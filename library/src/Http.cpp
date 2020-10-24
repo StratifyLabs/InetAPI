@@ -257,7 +257,7 @@ var::String Http::receive_header_fields() {
         StringViewList tokens = attribute.value().split(" ;");
         if (KeyString(tokens.at(0)).to_upper() == "TEXT/EVENT-STREAM") {
           // accept data until the operation is cancelled
-          m_content_length = static_cast<u32>(-1);
+          m_content_length = FSAPI_LINK_DEFAULT_PAGE_SIZE;
         }
       }
 
@@ -347,8 +347,8 @@ HttpClient &HttpClient::execute_method(
           .to_lower()
           .string_view()
           .find("text/event-stream") == 0) {
+    printf("listening for stream\n");
     set_stream_events(true);
-    m_content_length = FSAPI_LINK_DEFAULT_PAGE_SIZE;
   } else {
     set_stream_events(false);
   }

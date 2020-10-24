@@ -6,6 +6,8 @@
 
 #include <mbedtls_api.h>
 
+#include <var/Data.hpp>
+
 #include "api/api.hpp"
 #include "chrono/ClockTime.hpp"
 
