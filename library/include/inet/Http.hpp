@@ -293,16 +293,16 @@ private:
   var::String m_host;
   Socket m_socket;
 
+  API_RAB(HttpClient, connected, false);
+
+  bool m_is_keep_alive = false;
+  bool m_is_follow_redirects = true;
+
   virtual Socket &socket() override { return m_socket; }
   virtual const Socket &socket() const override { return m_socket; }
   virtual void renew_socket() {
     m_socket = std::move(Socket(Socket::Family::inet, Socket::Type::stream));
   }
-
-  bool m_is_keep_alive = false;
-  bool m_is_follow_redirects = true;
-  bool m_is_connected = false;
-
 };
 
 class HttpSecureClient : public HttpClient {

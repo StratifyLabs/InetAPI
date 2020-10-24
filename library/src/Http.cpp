@@ -147,7 +147,7 @@ void Http::add_header_field(var::StringView key, var::StringView value) {
     m_is_header_dirty = false;
   }
 
-  (m_header_fields += key + ": " + value + "\r\n").to_upper();
+  m_header_fields += key + ": " + value + "\r\n";
 }
 
 void Http::add_header_fields(var::StringView fields) {
@@ -219,17 +219,24 @@ void Http::send(
 }
 
 void Http::send(const Request &request) const {
+#if SHOW_HEADERS
+  printf("%s\n%s\n", request.to_string().cstring(),
+         header_fields().get_string().cstring());
+#endif
   socket().write(request.to_string() + "\r\n" + header_fields() + "\r\n");
 }
 
 int Http::get_chunk_size() const {
-  String line = socket().gets();
-  return line.to_integer();
+  auto line = socket().gets();
+  return line.to_unsigned_long(StringView::Base::hexidecimal);
 }
 
 var::String Http::receive_header_fields() {
   var::String result;
   var::String line;
+
+  m_content_length = 0;
+  m_is_transfer_encoding_chunked = false;
 
   do {
     line = std::move(socket().gets('\n'));
@@ -277,19 +284,18 @@ void Http::receive(
   if (is_transfer_encoding_chunked()) {
     // read chunk by chunk
     int chunk_size = 0;
+    int bytes_received = 0;
+    char newline[2];
     do {
       chunk_size = get_chunk_size();
-      int bytes_received = 0;
-      file.write(
-        socket(),
-        fs::File::Write()
-          .set_progress_callback(progress_callback)
-          .set_location(bytes_received)
-          .set_page_size(transfer_size())
-          .set_size(chunk_size));
-
+      file.write(socket(), fs::File::Write()
+                               .set_progress_callback(progress_callback)
+                               .set_location(bytes_received)
+                               .set_page_size(chunk_size)
+                               .set_size(chunk_size));
       bytes_received += chunk_size;
-      socket().gets(); // read the \r\n at the end
+      // read the \r\n at the end of the data
+      socket().read(View(newline));
       API_RETURN_IF_ERROR();
     } while (chunk_size);
 
@@ -297,9 +303,10 @@ void Http::receive(
   }
 
   // write the bytes to the file
-  file.write(
-    socket(),
-    fs::File::Write().set_page_size(512).set_size(m_content_length));
+  file.write(socket(), fs::File::Write()
+                           .set_page_size(512)
+                           .set_size(m_content_length)
+                           .set_progress_callback(progress_callback));
 }
 
 HttpClient::HttpClient(var::StringView http_version) : Http(http_version) {}
@@ -332,11 +339,11 @@ HttpClient &HttpClient::execute_method(
   }
 
   if (get_header_field("connection").is_empty()) {
-    add_header_field("connection", "keep-alive");
+    add_header_field("Connection", "keep-alive");
   }
 
   if (options.request()) {
-    add_header_field("content-length", NumberString(options.request()->size()));
+    add_header_field("Content-Length", NumberString(options.request()->size()));
   }
 
   send(Request(method, path, http_version()));
@@ -387,12 +394,14 @@ HttpClient &HttpClient::execute_method(
 }
 
 HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
-  AddressInfo address_info(
-    AddressInfo::Construct()
-      .set_node(domain_name)
-      .set_service(port != 0xffff ? StringView(NumberString(port)) : StringView(""))
-      .set_family(Socket::Family::inet)
-      .set_flags(AddressInfo::Flags::canon_name));
+
+  AddressInfo address_info(AddressInfo::Construct()
+                               .set_node(domain_name)
+                               .set_service(port != 0xffff
+                                                ? StringView(NumberString(port))
+                                                : StringView(""))
+                               .set_family(Socket::Family::inet)
+                               .set_flags(AddressInfo::Flags::canon_name));
 
   for (const SocketAddress &address : address_info.list()) {
     renew_socket();
