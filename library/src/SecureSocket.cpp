@@ -118,12 +118,18 @@ int SecureSocket::interface_write(const void *buf, int nbyte) const {
 }
 
 int SecureSocket::interface_read(void *buf, int nbyte) const {
-  return api()->read(m_context, buf, nbyte);
+  int result = api()->read(m_context, buf, nbyte);
+  if (result < 0) {
+    printf("ss returned: %d (0x%04x) %p %p %d\n", result, result * -1,
+           m_context, buf, nbyte);
+  }
+  return result;
 }
 
 int SecureSocket::internal_close() const {
   int result = 0;
   if (m_context) {
+    printf("close secure socket\n");
     result = api()->close(&m_context);
     m_context = nullptr;
   }

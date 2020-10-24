@@ -300,11 +300,14 @@ void Http::receive(
     return;
   }
 
-  // write the bytes to the file
-  file.write(socket(), fs::File::Write()
-                           .set_page_size(512)
-                           .set_size(m_content_length)
-                           .set_progress_callback(progress_callback));
+  do {
+    // write the bytes to the file
+    file.write(socket(), fs::File::Write()
+                             .set_page_size(FSAPI_LINK_DEFAULT_PAGE_SIZE)
+                             .set_size(m_content_length)
+                             .set_progress_callback(progress_callback));
+
+  } while (is_stream_events() && return_value() > 0);
 }
 
 HttpClient::HttpClient(var::StringView http_version) : Http(http_version) {}
@@ -340,6 +343,16 @@ HttpClient &HttpClient::execute_method(
     add_header_field("Connection", "keep-alive");
   }
 
+  if (KeyString(get_header_field("accept"))
+          .to_lower()
+          .string_view()
+          .find("text/event-stream") == 0) {
+    set_stream_events(true);
+    m_content_length = FSAPI_LINK_DEFAULT_PAGE_SIZE;
+  } else {
+    set_stream_events(false);
+  }
+
   if (options.request()) {
     add_header_field("Content-Length", NumberString(options.request()->size()));
   }
@@ -356,11 +369,6 @@ HttpClient &HttpClient::execute_method(
   m_response = Response(socket().gets());
   set_header_fields(receive_header_fields());
   API_RETURN_VALUE_IF_ERROR(*this);
-
-  if (KeyString(get_header_field("Connection")).to_upper() == "CLOSE") {
-    renew_socket();
-    m_is_connected = false;
-  }
 
   const bool is_redirected = m_is_follow_redirects && m_response.is_redirect();
 
@@ -389,6 +397,11 @@ HttpClient &HttpClient::execute_method(
 
       return execute_method(method, location, options);
     }
+  }
+
+  if (KeyString(get_header_field("Connection")).to_upper() == "CLOSE") {
+    renew_socket();
+    m_is_connected = false;
   }
 
   return *this;

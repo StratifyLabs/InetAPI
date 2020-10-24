@@ -207,6 +207,8 @@ protected:
   Request m_request;
   Response m_response;
 
+  virtual Socket &socket() = 0;
+  virtual const Socket &socket() const = 0;
 
   void send(const Response &response) const;
   void send(const Request &request) const;
@@ -221,9 +223,6 @@ protected:
     const fs::File &file,
     const api::ProgressCallback *progress_callback = nullptr) const;
 
-  virtual Socket &socket() = 0;
-  virtual const Socket &socket() const = 0;
-
   var::StringView header_fields() const {
     return var::StringView(m_header_fields);
   }
@@ -234,8 +233,8 @@ protected:
 
 private:
   API_AB(Http, transfer_encoding_chunked, false);
+  API_AB(Http, stream_events, false);
   API_AF(Http, var::StringView, http_version, "HTTP/1.1");
-  // API_AC(Http, var::String, header_fields);
   var::String m_header_fields;
 
   API_AF(Http, size_t, transfer_size, 1024);
@@ -288,6 +287,9 @@ public:
 
   HttpClient &connect(var::StringView domain_name, u16 port = 80);
 
+  virtual Socket &socket() override { return m_socket; }
+  virtual const Socket &socket() const override { return m_socket; }
+
 private:
   SocketAddress m_address;
   var::String m_host;
@@ -295,11 +297,8 @@ private:
 
   API_RAB(HttpClient, connected, false);
 
-  bool m_is_keep_alive = false;
   bool m_is_follow_redirects = true;
 
-  virtual Socket &socket() override { return m_socket; }
-  virtual const Socket &socket() const override { return m_socket; }
   virtual void renew_socket() {
     m_socket = std::move(Socket(Socket::Family::inet, Socket::Type::stream));
   }
@@ -357,11 +356,12 @@ public:
     return *this;
   }
 
+  Socket &socket() override { return m_socket; }
+  const Socket &socket() const override { return m_socket; }
+
 private:
   SecureSocket m_socket;
 
-  Socket &socket() override { return m_socket; }
-  const Socket &socket() const override { return m_socket; }
   void renew_socket() override final {
     m_socket
       = std::move(SecureSocket(Socket::Family::inet, Socket::Type::stream));
