@@ -108,7 +108,8 @@ var::KeyString Http::to_string(Method method) {
     API_HANDLE_METHOD_CASE(post);
     API_HANDLE_METHOD_CASE(put);
     API_HANDLE_METHOD_CASE(head);
-    API_HANDLE_METHOD_CASE(delete_);
+  case Method::delete_:
+    return "DELETE";
     API_HANDLE_METHOD_CASE(patch);
     API_HANDLE_METHOD_CASE(options);
     API_HANDLE_METHOD_CASE(trace);
@@ -235,9 +236,6 @@ var::String Http::receive_header_fields() {
   var::String result;
   var::String line;
 
-  m_content_length = 0;
-  m_is_transfer_encoding_chunked = false;
-
   do {
     line = std::move(socket().gets('\n'));
 
@@ -345,6 +343,9 @@ HttpClient &HttpClient::execute_method(
   if (options.request()) {
     add_header_field("Content-Length", NumberString(options.request()->size()));
   }
+
+  m_content_length = 0;
+  set_transfer_encoding_chunked(false);
 
   send(Request(method, path, http_version()));
 
