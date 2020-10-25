@@ -113,7 +113,7 @@ public:
   using Post = ExecuteMethod;
   using Remove = ExecuteMethod;
 
-  static var::StackString64 to_string(Status status);
+  static var::KeyString to_string(Status status);
   static var::KeyString to_string(Method method);
   static Method method_from_string(var::StringView string);
 

@@ -18,11 +18,11 @@ using namespace inet;
 
 #define API_HANDLE_STATUS_CASE(c)                                              \
   case Status::c:                                                              \
-    result = StackString64().format("%d %s", Status::c, MCU_STRINGIFY(c));     \
+    result = KeyString().format("%d %s", Status::c, MCU_STRINGIFY(c));         \
     break
 
-var::StackString64 Http::to_string(Status status) {
-  var::StackString64 result;
+var::KeyString Http::to_string(Status status) {
+  var::KeyString result;
   switch (status) {
     API_HANDLE_STATUS_CASE(null);
     API_HANDLE_STATUS_CASE(continue_);
@@ -89,8 +89,7 @@ var::StackString64 Http::to_string(Status status) {
     API_HANDLE_STATUS_CASE(network_authentication_required);
   }
 
-  result(
-    StackString64::Replace().set_old_character('_').set_new_character(' '));
+  result(KeyString::Replace().set_old_character('_').set_new_character(' '));
 
   return result;
 }
@@ -367,7 +366,11 @@ HttpClient &HttpClient::execute_method(
   }
 
   m_response = Response(socket().gets());
+#if SHOW_HEADERS
+  printf("%s\n", m_response.to_string().cstring());
+#endif
   set_header_fields(receive_header_fields());
+
   API_RETURN_VALUE_IF_ERROR(*this);
 
   const bool is_redirected = m_is_follow_redirects && m_response.is_redirect();

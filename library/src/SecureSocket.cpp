@@ -129,7 +129,6 @@ int SecureSocket::interface_read(void *buf, int nbyte) const {
 int SecureSocket::internal_close() const {
   int result = 0;
   if (m_context) {
-    printf("close secure socket\n");
     result = api()->close(&m_context);
     m_context = nullptr;
   }
