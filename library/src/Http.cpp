@@ -191,9 +191,8 @@ void Http::send(const Response &response) const {
     + (header_fields().is_empty() ? "\r\n" : ""));
 }
 
-void Http::send(
-  const fs::File &file,
-  const api::ProgressCallback *progress_callback) const {
+void Http::send(const fs::FileObject &file,
+                const api::ProgressCallback *progress_callback) const {
   if (is_transfer_encoding_chunked()) {
     const size_t size = file.size();
     for (size_t i = 0; i < size; i++) {
@@ -274,9 +273,8 @@ var::String Http::receive_header_fields() {
   return std::move(result.to_upper());
 }
 
-void Http::receive(
-  const fs::File &file,
-  const api::ProgressCallback *progress_callback) const {
+void Http::receive(const fs::FileObject &file,
+                   const api::ProgressCallback *progress_callback) const {
 
   if (is_transfer_encoding_chunked()) {
     // read chunk by chunk

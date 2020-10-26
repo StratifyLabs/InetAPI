@@ -98,8 +98,8 @@ public:
   };
 
   class ExecuteMethod {
-    API_AF(ExecuteMethod, const fs::File *, response, nullptr);
-    API_AF(ExecuteMethod, const fs::File *, request, nullptr);
+    API_AF(ExecuteMethod, const fs::FileObject *, response, nullptr);
+    API_AF(ExecuteMethod, const fs::FileObject *, request, nullptr);
     API_AF(
       ExecuteMethod,
       const api::ProgressCallback *,
@@ -216,12 +216,10 @@ protected:
   void add_header_field(var::StringView key, var::StringView value);
   void add_header_fields(var::StringView fields);
 
-  void send(
-    const fs::File &file,
-    const api::ProgressCallback *progress_callback = nullptr) const;
-  void receive(
-    const fs::File &file,
-    const api::ProgressCallback *progress_callback = nullptr) const;
+  void send(const fs::FileObject &file,
+            const api::ProgressCallback *progress_callback = nullptr) const;
+  void receive(const fs::FileObject &file,
+               const api::ProgressCallback *progress_callback = nullptr) const;
 
   var::StringView header_fields() const {
     return var::StringView(m_header_fields);
@@ -391,23 +389,23 @@ public:
     return *this;
   }
 
-  const HttpServer &send(
-    const fs::File &file,
-    const api::ProgressCallback *progress_callback = nullptr) const {
+  const HttpServer &
+  send(const fs::FileObject &file,
+       const api::ProgressCallback *progress_callback = nullptr) const {
     Http::send(file, progress_callback);
     return *this;
   }
 
-  const HttpServer &receive(
-    const fs::File &file,
-    const api::ProgressCallback *progress_callback = nullptr) const {
+  const HttpServer &
+  receive(const fs::FileObject &file,
+          const api::ProgressCallback *progress_callback = nullptr) const {
     Http::receive(file, progress_callback);
     return *this;
   }
 
-  HttpServer &receive(
-    const fs::File &file,
-    const api::ProgressCallback *progress_callback = nullptr) {
+  HttpServer &
+  receive(const fs::FileObject &file,
+          const api::ProgressCallback *progress_callback = nullptr) {
     Http::receive(file, progress_callback);
     return *this;
   }

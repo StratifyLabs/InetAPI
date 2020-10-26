@@ -138,7 +138,7 @@ public:
 
     {
       m_is_listening = false;
-      PrinterObject po(printer(), "httpClient/Server");
+      Printer::Object po(printer(), "httpClient/Server");
       Thread server_thread = start_server(http_server);
       TEST_ASSERT(is_success());
 
@@ -204,7 +204,7 @@ public:
 
     {
 
-      PrinterObject po(printer(), "http://httpbin.org/get");
+      Printer::Object po(printer(), "http://httpbin.org/get");
       HttpClient http_client;
 
       printer().key("is", StringView("connecting"));
@@ -232,7 +232,7 @@ public:
     }
 
     if (1) {
-      PrinterObject po(printer(), "ip.jsontest.com");
+      Printer::Object po(printer(), "ip.jsontest.com");
 
       DataFile response;
       TEST_ASSERT(HttpClient()
@@ -250,7 +250,7 @@ public:
     }
 
     {
-      PrinterObject po(printer(), "https://httpbin.org/get");
+      Printer::Object po(printer(), "https://httpbin.org/get");
       HttpSecureClient http_client;
 
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
@@ -267,7 +267,7 @@ public:
     }
 
     {
-      PrinterObject po(printer(), "https://httpbin.org/redirect");
+      Printer::Object po(printer(), "https://httpbin.org/redirect");
 
       HttpClient http_client;
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
@@ -288,7 +288,7 @@ public:
     {
       // https://github.com/StratifyLabs/StratifyAPI/blob/master/src/inet/Socket.cpp
 
-      PrinterObject po(printer(), "https://github.com");
+      Printer::Object po(printer(), "https://github.com");
       HttpSecureClient http_client;
 
       TEST_ASSERT(http_client.connect("github.com").is_success());
@@ -310,7 +310,7 @@ public:
 
   bool socket_address_case() {
 
-    printer::PrinterObject po(printer(), "socketAddress");
+    printer::Printer::Object po(printer(), "socketAddress");
     TEST_ASSERT(SocketAddress4().family() == S::Family::inet);
     TEST_ASSERT(SocketAddress6().family() == S::Family::inet6);
 
