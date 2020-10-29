@@ -13,9 +13,9 @@ namespace printer {
 
 Printer &operator<<(Printer &printer, const inet::WifiSsidInfo &a) {
   printer.key("name", a.get_name());
-  printer.key("channel", var::NumberToString(a.channel()));
-  printer.key("rssi", var::NumberToString(a.rssi()));
-  printer.key("security", var::NumberToString(a.security()));
+  printer.key("channel", var::NumberString(a.channel()));
+  printer.key("rssi", var::NumberString(a.rssi()));
+  printer.key("security", var::NumberString(a.security()));
   return printer;
 }
 Printer &operator<<(Printer &printer, const inet::WifiIpInfo &a) {
@@ -27,9 +27,9 @@ Printer &operator<<(Printer &printer, const inet::WifiIpInfo &a) {
 }
 
 Printer &operator<<(Printer &printer, const inet::WifiInfo &a) {
-  printer.key("valid", a.is_valid());
-  printer.key("connected", a.is_connected());
-  printer.key("rssi", var::NumberToString(a.rssi()));
+  printer.key_bool("valid", a.is_valid());
+  printer.key_bool("connected", a.is_connected());
+  printer.key("rssi", var::NumberString(a.rssi()));
   printer.open_object("ip");
   printer << a.get_ip_info();
   printer.close_object();

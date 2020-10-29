@@ -259,12 +259,12 @@ private:
 
 } // namespace inet
 
-namespace sys {
+namespace printer {
 class Printer;
 Printer &operator<<(Printer &printer, const inet::WifiSsidInfo &a);
 Printer &operator<<(Printer &printer, const inet::WifiInfo &a);
 Printer &operator<<(Printer &printer, const inet::WifiIpInfo &a);
-} // namespace sys
+} // namespace printer
 
 #endif
 

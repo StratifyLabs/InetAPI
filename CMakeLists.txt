@@ -8,9 +8,12 @@ set(CMAKE_MODULE_PATH ${SOS_SDK_PATH}/Tools/gcc/cmake)
 set(CMAKE_TOOLCHAIN_FILE ${CMAKE_MODULE_PATH}/sos-toolchain.cmake)
 include(sos-sdk)
 
-include(targets/StratifyAPI)
-
 project(InetAPI CXX)
+
+if(NOT DEFINED IS_SDK)
+	include(StratifyAPI)
+endif()
+
 
 add_subdirectory(mbedtls mbedtls)
 add_subdirectory(library library)
