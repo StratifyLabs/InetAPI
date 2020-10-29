@@ -11,14 +11,15 @@ int wifi_no_warning = 0;
 
 namespace printer {
 
-Printer &operator<<(Printer &printer, const inet::WifiSsidInfo &a) {
+Printer &operator<<(Printer &printer, const inet::Wifi::SsidInfo &a) {
   printer.key("name", a.get_name());
   printer.key("channel", var::NumberString(a.channel()));
   printer.key("rssi", var::NumberString(a.rssi()));
   printer.key("security", var::NumberString(a.security()));
   return printer;
 }
-Printer &operator<<(Printer &printer, const inet::WifiIpInfo &a) {
+
+Printer &operator<<(Printer &printer, const inet::Wifi::IpInfo &a) {
   printer.key("ip", a.get_ip_address().to_string());
   printer.key("dns", a.get_dns_address().to_string());
   printer.key("subnet", a.get_subnet_mask().to_string());
@@ -26,7 +27,7 @@ Printer &operator<<(Printer &printer, const inet::WifiIpInfo &a) {
   return printer;
 }
 
-Printer &operator<<(Printer &printer, const inet::WifiInfo &a) {
+Printer &operator<<(Printer &printer, const inet::Wifi::Info &a) {
   printer.key_bool("valid", a.is_valid());
   printer.key_bool("connected", a.is_connected());
   printer.key("rssi", var::NumberString(a.rssi()));
@@ -44,11 +45,10 @@ WifiApi Wifi::m_api;
 
 Wifi::Wifi() {}
 
-var::Vector<WifiSsidInfo> Wifi::scan(
-  const WifiScanAttributes &attributes,
-  const chrono::MicroTime &timeout) {
+var::Vector<Wifi::SsidInfo> Wifi::scan(const ScanAttributes &attributes,
+                                       const chrono::MicroTime &timeout) {
   if (start_scan(attributes) < 0) {
-    return var::Vector<WifiSsidInfo>();
+    return var::Vector<SsidInfo>();
   }
 
   chrono::ClockTimer t;
@@ -61,8 +61,8 @@ var::Vector<WifiSsidInfo> Wifi::scan(
   return get_ssid_info_list();
 }
 
-var::Vector<WifiSsidInfo> Wifi::get_ssid_info_list() {
-  var::Vector<WifiSsidInfo> result;
+var::Vector<Wifi::SsidInfo> Wifi::get_ssid_info_list() {
+  var::Vector<SsidInfo> result;
 
   int count = api()->get_scan_count(m_context);
   for (int i = 0; i < count; i++) {
@@ -71,31 +71,27 @@ var::Vector<WifiSsidInfo> Wifi::get_ssid_info_list() {
       return result;
     }
 
-    result.push_back(WifiSsidInfo(info));
+    result.push_back(SsidInfo(info));
   }
 
   return result;
 }
 
-int Wifi::start_connect(
-  const WifiSsidInfo &ssid_info,
-  const WifiAuthInfo &auth) {
+int Wifi::start_connect(const SsidInfo &ssid_info, const AuthInfo &auth) {
   return api()->connect(m_context, &ssid_info.info(), &auth.auth());
 }
 
-WifiIpInfo Wifi::connect(
-  const WifiSsidInfo &ssid_info,
-  const WifiAuthInfo &auth,
-  const chrono::MicroTime &timeout) {
+Wifi::IpInfo Wifi::connect(const SsidInfo &ssid_info, const AuthInfo &auth,
+                           const chrono::MicroTime &timeout) {
   int result = api()->connect(m_context, &ssid_info.info(), &auth.auth());
 
   if (result < 0) {
-    return WifiIpInfo();
+    return IpInfo();
   }
 
   chrono::ClockTimer t;
   t.start();
-  WifiInfo info;
+  Info info;
   do {
     chrono::wait(50_milliseconds);
     info = get_info();
@@ -106,7 +102,7 @@ WifiIpInfo Wifi::connect(
     return info.get_ip_info();
   }
 
-  return WifiIpInfo();
+  return IpInfo();
 }
 
 #endif

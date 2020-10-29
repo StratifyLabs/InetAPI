@@ -21,10 +21,10 @@ Url::Url(var::StringView url) {
 
     if (var::String(url_tokens.at(0)) == "https:") {
       m_port = 443;
-      m_protocol = protocol_https;
+      m_protocol = Protocol::https;
     } else if (var::String(url_tokens.at(0)) == "http:") {
       m_port = 80;
-      m_protocol = protocol_http;
+      m_protocol = Protocol::http;
     }
 
     var::Tokenizer domain_name = var::Tokenizer(
@@ -48,9 +48,9 @@ Url::Url(var::StringView url) {
 }
 
 var::String Url::to_string() const {
-  return var::String("http")
-         + (m_protocol == protocol_https ? var::String("s") : var::String())
-         + "://" + m_domain_name + m_path;
+  return var::String("http") +
+         (m_protocol == Protocol::https ? var::String("s") : var::String()) +
+         "://" + m_domain_name + m_path;
 }
 
 var::String Url::encode(var::StringView input) {

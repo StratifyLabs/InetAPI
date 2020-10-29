@@ -10,14 +10,14 @@ namespace inet {
 
 class Url : public api::ExecutionContext {
 public:
-  enum protocol { protocol_https, protocol_http };
+  enum class Protocol { https, http };
 
   Url(var::StringView url = "");
 
   var::String to_string() const;
 
   u16 port() const { return m_port; }
-  u8 protocol() const { return m_protocol; }
+  Protocol protocol() const { return m_protocol; }
   const var::String &domain_name() const { return m_domain_name; }
   const var::String &path() const { return m_path; }
 
@@ -27,7 +27,7 @@ private:
   /*! \cond */
   var::String m_domain_name;
   var::String m_path;
-  u8 m_protocol;
+  Protocol m_protocol;
   u16 m_port;
   /*! \endcond */
 };
