@@ -314,9 +314,8 @@ HttpClient &HttpClient::execute_method(
   var::StringView path,
   const ExecuteMethod &options) {
 
-  if (
-    (m_is_connected == false) && (m_host.is_empty() == true)
-    && connect(m_host).is_error()) {
+  if ((m_is_connected == false) && (m_host.is_empty() == false) &&
+      connect(m_host).is_error()) {
     return *this;
   }
 
@@ -344,14 +343,15 @@ HttpClient &HttpClient::execute_method(
           .to_lower()
           .string_view()
           .find("text/event-stream") == 0) {
-    printf("listening for stream\n");
     set_stream_events(true);
   } else {
     set_stream_events(false);
   }
 
   if (options.request()) {
-    add_header_field("Content-Length", NumberString(options.request()->size()));
+    add_header_field("Content-Length",
+                     NumberString(options.request()->size() -
+                                  options.request()->location()));
   }
 
   m_content_length = 0;
@@ -418,6 +418,7 @@ HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
                                .set_family(Socket::Family::inet)
                                .set_flags(AddressInfo::Flags::canon_name));
 
+  API_RETURN_VALUE_IF_ERROR(*this);
   for (const SocketAddress &address : address_info.list()) {
     renew_socket();
     socket().connect(address);
