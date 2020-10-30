@@ -309,10 +309,10 @@ void Http::receive(const fs::FileObject &file,
 
 HttpClient::HttpClient(var::StringView http_version) : Http(http_version) {}
 
-HttpClient &HttpClient::execute_method(
-  Method method,
-  var::StringView path,
-  const ExecuteMethod &options) {
+HttpClient &HttpClient::execute_method(Method method, var::StringView path,
+                                       const ExecuteMethod &options) {
+
+  API_RETURN_VALUE_IF_ERROR(*this);
 
   if ((m_is_connected == false) && (m_host.is_empty() == false) &&
       connect(m_host).is_error()) {
@@ -424,16 +424,14 @@ HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
     socket().connect(address);
     if (is_success()) {
       m_is_connected = true;
-      m_host = String(domain_name);
+      m_host = domain_name.get_string();
       return (*this);
     }
     API_RESET_ERROR();
   }
 
   API_RETURN_VALUE_ASSIGN_ERROR(
-    *this,
-    var::GeneralString(domain_name).cstring(),
-    ECONNREFUSED);
+      *this, var::GeneralString(domain_name).cstring(), ECONNREFUSED);
 }
 
 Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
