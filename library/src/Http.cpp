@@ -7,7 +7,7 @@
 #include "printer.hpp"
 #include "var.hpp"
 
-#define SHOW_HEADERS 1
+#define SHOW_HEADERS 0
 #if defined __link
 #define AGGREGATE_TRAFFIC(msg) (m_traffic += msg)
 #else
@@ -227,7 +227,7 @@ void Http::send(const Request &request) const {
 
 int Http::get_chunk_size() const {
   auto line = socket().gets();
-  return line.to_unsigned_long(StringView::Base::hexidecimal);
+  return line.to_unsigned_long(StringView::Base::hexadecimal);
 }
 
 var::String Http::receive_header_fields() {

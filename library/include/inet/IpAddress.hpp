@@ -92,7 +92,7 @@ public:
     size_t i = 0;
     for (const auto &value : value_list) {
       view.to_u16()[i++]
-        = value.to_unsigned_long(var::String::Base::hexidecimal);
+        = value.to_unsigned_long(var::String::Base::hexadecimal);
     }
   }
 
@@ -119,19 +119,19 @@ public:
 
     return IpAddress6(var::Array<u16, 8>(std::array<u16, 8>(
       {static_cast<u16>(
-         list.at(0).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(0).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(1).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(1).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(2).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(2).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(3).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(3).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(5).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(5).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(6).to_unsigned_long(var::String::Base::hexidecimal)),
+         list.at(6).to_unsigned_long(var::String::Base::hexadecimal)),
        static_cast<u16>(
-         list.at(7).to_unsigned_long(var::String::Base::hexidecimal))})));
+         list.at(7).to_unsigned_long(var::String::Base::hexadecimal))})));
   }
 
   const struct in6_addr &address() const { return m_address; }
