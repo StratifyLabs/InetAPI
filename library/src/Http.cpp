@@ -374,10 +374,15 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
   const bool is_redirected = m_is_follow_redirects && m_response.is_redirect();
 
   if (m_content_length || is_transfer_encoding_chunked()) {
+
+    // don't progress on reponse if request already sent data
+    const api::ProgressCallback *callback =
+        method == Http::Method::get ? options.progress_callback() : nullptr;
+
     if (options.response() && (is_redirected == false)) {
-      receive(*options.response(), options.progress_callback());
+      receive(*options.response(), callback);
     } else {
-      receive(NullFile(), options.progress_callback());
+      receive(NullFile(), nullptr);
     }
   }
 
