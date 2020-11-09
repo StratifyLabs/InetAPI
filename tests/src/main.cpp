@@ -1,4 +1,5 @@
-﻿
+﻿#include <signal.h>
+
 #include "UnitTest.hpp"
 
 #define VERSION "0.1"
