@@ -11,7 +11,7 @@ include(sos-sdk)
 project(InetAPI CXX)
 
 if(NOT DEFINED IS_SDK)
-	include(StratifyAPI)
+	include(API)
 endif()
 
 
