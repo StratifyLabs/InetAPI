@@ -1,7 +1,7 @@
 #ifndef MBEDTLS_API_H
 #define MBEDTLS_API_H
 
-#include <sos/api/crypt_api.h>
+#include <API/api/api.h>
 
 #if defined __win32
 #define _BSD_SOURCE
@@ -18,7 +18,7 @@ typedef u32 in_addr_t;
 #define MBEDTLS_API_T 1 // increment when adding functions
 
 typedef struct {
-  sos_api_t sos_api;
+  api_t sos_api;
   // enough for a client
   int (*socket)(void **context, int domain, int type, int protocol);
   int (*connect)(void *context, const struct sockaddr *address,

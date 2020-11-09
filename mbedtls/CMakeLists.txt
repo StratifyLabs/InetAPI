@@ -73,6 +73,7 @@ target_compile_definitions(${RELEASE_TARGET}
 
 target_include_directories(${RELEASE_TARGET}
 	PUBLIC
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 	PRIVATE
 	${SOS_INCLUDE_DIRECTORIES}
 	)
@@ -84,16 +85,16 @@ sos_sdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
 sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
 
 if(SOS_IS_LINK)
-sos_sdk_library_target(COVERAGE mbedtls "${LIB_OPTION}" coverage ${SOS_ARCH})
-add_library(${COVERAGE_TARGET} STATIC)
-sos_sdk_copy_target(${RELEASE_TARGET} ${COVERAGE_TARGET})
+	sos_sdk_library_target(COVERAGE mbedtls "${LIB_OPTION}" coverage ${SOS_ARCH})
+	add_library(${COVERAGE_TARGET} STATIC)
+	sos_sdk_copy_target(${RELEASE_TARGET} ${COVERAGE_TARGET})
 
-target_compile_options(${COVERAGE_TARGET}
-	PUBLIC
-	--coverage
-	)
+	target_compile_options(${COVERAGE_TARGET}
+		PUBLIC
+		--coverage
+		)
 
-sos_sdk_library_add_arch_targets("${COVERAGE_OPTIONS}" ${SOS_ARCH} StratifyOS)
+	sos_sdk_library_add_arch_targets("${COVERAGE_OPTIONS}" ${SOS_ARCH} "")
 endif()
 
 sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
@@ -115,3 +116,5 @@ add_custom_target(
 	--verbose
 	${FORMAT_LIST}
 	)
+
+
