@@ -114,7 +114,7 @@ var::KeyString Http::to_string(Method method) {
     API_HANDLE_METHOD_CASE(trace);
   }
 
-  return std::move(result);
+  return result;
 }
 
 Http::Method Http::method_from_string(var::StringView string) {
@@ -270,7 +270,7 @@ var::String Http::receive_header_fields() {
            && (socket().is_success())); // while reading the header
 
   m_is_header_dirty = true;
-  return std::move(result.to_upper());
+	return result.to_upper();
 }
 
 void Http::receive(const fs::FileObject &file,
@@ -456,7 +456,7 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
       .replace(String::Replace().set_old_string("\n"))
       .to_upper();
   }
-  return std::move(Http::HeaderField(var::String(key.cstring()), value));
+	return Http::HeaderField(var::String(key.cstring()), value);
 }
 
 HttpServer &HttpServer::listen(

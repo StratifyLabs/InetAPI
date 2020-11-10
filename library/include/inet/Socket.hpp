@@ -179,10 +179,10 @@ public:
 
   var::NumberString get_address_string() const {
     if (m_sockaddr.size == sizeof(struct sockaddr_in)) {
-      return std::move(
-        IpAddress4(m_sockaddr.sockaddr_in.sin_addr.s_addr).to_string());
+			return
+				IpAddress4(m_sockaddr.sockaddr_in.sin_addr.s_addr).to_string();
     }
-    return std::move(IpAddress6(m_sockaddr.sockaddr_in6.sin6_addr).to_string());
+		return IpAddress6(m_sockaddr.sockaddr_in6.sin6_addr).to_string();
   }
 
   const struct sockaddr *to_sockaddr() const { return &m_sockaddr.sockaddr; }

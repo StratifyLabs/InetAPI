@@ -54,12 +54,12 @@ public:
   }
 
   var::NumberString to_string() const {
-    return std::move(var::NumberString().format(
+		return var::NumberString().format(
       "%d.%d.%d.%d",
       ((m_address >> 24) & 0xff),
       ((m_address >> 16) & 0xff),
       ((m_address >> 8) & 0xff),
-      ((m_address >> 0) & 0xff)));
+			((m_address >> 0) & 0xff));
   }
 
   static IpAddress4 from_string(const var::String &value) {
@@ -110,7 +110,7 @@ public:
         result.append(":");
       }
     }
-    return std::move(result);
+		return result;
   }
 
   static IpAddress6 from_string(const var::String &value) {

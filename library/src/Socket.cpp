@@ -178,7 +178,7 @@ SocketAddress Socket::get_sock_name() const {
   socklen_t length = sizeof(s.sockaddr_in6);
   API_SYSTEM_CALL("", ::getsockname(m_socket, &s.sockaddr, &length));
   s.size = length;
-  return std::move(SocketAddress(s));
+	return SocketAddress(s);
 }
 
 const Socket &
@@ -205,7 +205,7 @@ Socket Socket::accept(SocketAddress &address) const {
     ::accept(m_socket, &address.m_sockaddr.sockaddr, &len));
 
   address.m_sockaddr.size = len;
-  return std::move(result);
+  return result;
 }
 
 const Socket &Socket::connect(const SocketAddress &address) const {
@@ -289,7 +289,7 @@ SocketAddress Socket::receive_from(void *buf, int nbyte) const {
       &length)));
   sockaddr.size = length;
 
-  return std::move(SocketAddress(sockaddr));
+	return SocketAddress(sockaddr);
 }
 
 const Socket &Socket::shutdown(const fs::OpenMode how) const {

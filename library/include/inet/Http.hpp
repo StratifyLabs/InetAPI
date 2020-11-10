@@ -146,9 +146,9 @@ public:
     }
 
     var::String to_string() const {
-      return std::move(
+			return
         var::String(Http::to_string(m_method).cstring()) + " " + m_path + " "
-        + m_version.cstring());
+				+ m_version.cstring();
     }
 
   private:

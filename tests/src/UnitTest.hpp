@@ -501,7 +501,7 @@ public:
       for (const auto &a : address_info.list()) {
         Socket socket = std::move(Socket(a).bind(a));
         if (is_success()) {
-          return std::move(socket);
+					return socket;
         }
 
         API_RESET_ERROR();
@@ -605,7 +605,7 @@ private:
     while (!m_is_listening && server_thread.is_running()) {
       wait(25_milliseconds);
     }
-    return std::move(server_thread);
+		return server_thread;
   }
 
   void randomize_server_port() {
