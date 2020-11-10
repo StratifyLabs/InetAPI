@@ -108,7 +108,7 @@ Socket::Socket(Domain domain, Type type, Protocol protocol) : m_family(domain) {
       static_cast<int>(protocol)));
 }
 
-int Socket::decode_socket_return(int value) const {
+int Socket::decode_socket_return(long long int value) const {
 #if defined __win32
   switch (value) {
   case INVALID_SOCKET:
@@ -239,12 +239,21 @@ int Socket::interface_close(int fd) const {
 
 int Socket::interface_read(void *buf, int nbyte) const {
   return decode_socket_return(
-    ::recv(m_socket, buf, nbyte, static_cast<int>(message_flags())));
+		::recv(m_socket,
+				 #if defined __win32
+					 static_cast<char*>
+				 #endif
+					 (buf),
+					 nbyte, static_cast<int>(message_flags())));
 }
 
 int Socket::interface_write(const void *buf, int nbyte) const {
   return decode_socket_return(
-    ::send(m_socket, buf, nbyte, static_cast<int>(message_flags())));
+		::send(m_socket,
+				 #if defined __win32
+					 static_cast<const char*>
+				 #endif
+					 (buf), nbyte, static_cast<int>(message_flags())));
 }
 
 const Socket &Socket::send_to(
@@ -309,7 +318,10 @@ const Socket &Socket::set_option(const SocketOption &option) const {
       m_socket,
       static_cast<int>(option.m_level),
       static_cast<int>(option.m_name),
-      &option.m_value,
+												 #if defined __win32
+													 (const char*)
+												 #endif
+			(&option.m_value.integer),
       option.m_size)));
   return *this;
 }

@@ -52,7 +52,9 @@ public:
     passive = AI_PASSIVE,
     canon_name = AI_CANONNAME,
     numeric_host = AI_NUMERICHOST,
+#if defined AI_NUMERICSERV
     numeric_service = AI_NUMERICSERV
+#endif
   };
 
   enum class MessageFlags {
@@ -62,10 +64,16 @@ public:
 #if defined MSG_EOR
     end_of_record = MSG_EOR,
 #endif
+#if defined MSG_TRUNC
     truncated = MSG_TRUNC,
+#endif
+#if defined MSG_CTRUNC
     control_truncatd = MSG_CTRUNC,
+#endif
     wait_all = MSG_WAITALL,
+#if defined MSG_DONTWAIT
     dont_wait = MSG_DONTWAIT,
+#endif
 #if defined MSG_DONTROUTE
     dont_route = MSG_DONTROUTE,
 #endif
@@ -402,7 +410,7 @@ protected:
   virtual int
   interface_write(const void *buf, int nbyte) const override;
 
-  int decode_socket_return(int value) const;
+	int decode_socket_return(long long int value) const;
 
 private:
   mutable SOCKET_T m_socket = SOCKET_INVALID;

@@ -83,6 +83,12 @@ target_include_directories(${RELEASE_TARGET}
 	${SOS_INCLUDE_DIRECTORIES}
 	)
 
+if(SOS_SDK_IS_WINDOWS)
+  target_link_libraries(${RELEASE_TARGET}
+    INTERFACE ws2_32 wsock32 setupapi
+    )
+endif()
+
 
 sos_sdk_library_target(DEBUG mbedtls "${LIB_OPTION}" debug ${SOS_ARCH})
 add_library(${DEBUG_TARGET} STATIC)
