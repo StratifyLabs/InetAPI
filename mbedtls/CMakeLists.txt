@@ -39,9 +39,14 @@ set(PRIVATE_SOURCELIST
 	${HEADERS}
 	${FORMAT_SOURCELIST}
 	config/mbedtls/config.h
-	net_sockets.c
 	timing_alt.h
 	threading.c)
+
+if(SOS_IS_LINK)
+	list(APPEND PRIVATE_SOURCELIST ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/library/net_sockets.c)
+else()
+	list(APPEND PRIVATE_SOURCELIST ${CMAKE_CURRENT_SOURCE_DIR}/net_sockets.c)
+endif()
 
 set(SOS_OPTION kernel)
 set(SOS_DEFINITIONS ${SOS_DEFINITIONS} -DHAVE_LWIP_SOCKETS_H)

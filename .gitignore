@@ -3,3 +3,5 @@ cmake_link/
 cmake_arm/
 *.user
 mbedtls/mbedtls/
+cmake_qt_link/
+build_*
