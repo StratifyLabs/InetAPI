@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <windows.h>
 typedef uint32_t in_addr_t;
 
 #define SOCKET_T ::SOCKET
