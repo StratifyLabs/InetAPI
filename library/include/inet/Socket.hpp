@@ -68,11 +68,21 @@ public:
     dont_wait = MSG_DONTWAIT,
 #if defined MSG_DONTROUTE
     dont_route = MSG_DONTROUTE,
+#if defined MSG_EOF
     end_of_file = MSG_EOF,
+#endif
+#if defined MSG_WAITSTREAM
     wait_stream = MSG_WAITSTREAM,
+#endif
+#if defined MSG_FLUSH
     flush = MSG_FLUSH,
+#endif
+#if defined MSG_HOLD
     hold = MSG_HOLD,
+#endif
+#if defined MSG_SEND
     send = MSG_SEND,
+#endif
     have_more = MSG_HAVEMORE,
     receive_more = MSG_RCVMORE,
     need_socket_address = MSG_NEEDSA
