@@ -68,6 +68,7 @@ public:
     dont_wait = MSG_DONTWAIT,
 #if defined MSG_DONTROUTE
     dont_route = MSG_DONTROUTE,
+#endif
 #if defined MSG_EOF
     end_of_file = MSG_EOF,
 #endif
@@ -83,8 +84,13 @@ public:
 #if defined MSG_SEND
     send = MSG_SEND,
 #endif
+#if defined MSG_HAVEMORE
     have_more = MSG_HAVEMORE,
+#endif
+#if defined MSG_RCVMORE
     receive_more = MSG_RCVMORE,
+#endif
+#if defined MSG_NEEDSA
     need_socket_address = MSG_NEEDSA
 #endif
 
