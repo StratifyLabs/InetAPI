@@ -19,17 +19,11 @@ public:
 
   bool execute_class_api_case() {
 
-    if (!socket_case()) {
-      return false;
-    }
-
-    if (!socket_address_case()) {
-      return false;
-    }
-
-    if (!http_client_case()) {
-      return false;
-    }
+#if !defined __win32
+		TEST_ASSERT_RESULT(socket_case());
+		TEST_ASSERT_RESULT(socket_address_case());
+#endif
+		TEST_ASSERT_RESULT(http_client_case());
 
     return true;
   }
