@@ -4,7 +4,7 @@
 set(MBEDTLS_GIT_REPOSITORY "https://github.com/ARMmbed/mbedtls.git")
 set(MBEDTLS_BRANCH "mbedtls-2.16")
 
-if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/library)
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls)
 	message(STATUS "Need to clone manually for the first call to cmake")
 	execute_process(
 		COMMAND git clone --branch ${MBEDTLS_BRANCH} ${MBEDTLS_GIT_REPOSITORY}
@@ -119,6 +119,9 @@ target_compile_options(${DEBUG_TARGET}
 	PUBLIC
 	-Os
 	)
+
+install(FILES ${PROJECT_NAME}.cmake
+	DESTINATION cmake/targets)
 
 add_custom_target(
 	${API_NAME}_format
