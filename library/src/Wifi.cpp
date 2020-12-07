@@ -15,7 +15,7 @@ Printer &operator<<(Printer &printer, const inet::Wifi::SsidInfo &a) {
   printer.key("name", a.get_name());
   printer.key("channel", var::NumberString(a.channel()));
   printer.key("rssi", var::NumberString(a.rssi()));
-  printer.key("security", var::NumberString(a.security()));
+  printer.key("security", var::NumberString(static_cast<u8>(a.security())));
   return printer;
 }
 
@@ -43,11 +43,16 @@ using namespace inet;
 
 WifiApi Wifi::m_api;
 
-Wifi::Wifi() {}
+Wifi::Wifi() {
+  API_RETURN_IF_ERROR();
+  API_SYSTEM_CALL("", initialize());
+}
 
 var::Vector<Wifi::SsidInfo> Wifi::scan(const ScanAttributes &attributes,
                                        const chrono::MicroTime &timeout) {
-  if (start_scan(attributes) < 0) {
+  start_scan(attributes);
+
+  if (is_error()) {
     return var::Vector<SsidInfo>();
   }
 
@@ -77,13 +82,19 @@ var::Vector<Wifi::SsidInfo> Wifi::get_ssid_info_list() {
   return result;
 }
 
-int Wifi::start_connect(const SsidInfo &ssid_info, const AuthInfo &auth) {
-  return api()->connect(m_context, &ssid_info.info(), &auth.auth());
+Wifi &Wifi::start_connect(const SsidInfo &ssid_info, const AuthInfo &auth) {
+  API_RETURN_VALUE_IF_ERROR(*this);
+  API_SYSTEM_CALL("",
+                  api()->connect(m_context, &ssid_info.info(), &auth.auth()));
+  return *this;
 }
 
 Wifi::IpInfo Wifi::connect(const SsidInfo &ssid_info, const AuthInfo &auth,
                            const chrono::MicroTime &timeout) {
-  int result = api()->connect(m_context, &ssid_info.info(), &auth.auth());
+  API_RETURN_VALUE_IF_ERROR(IpInfo());
+
+  int result = API_SYSTEM_CALL(
+      "", api()->connect(m_context, &ssid_info.info(), &auth.auth()));
 
   if (result < 0) {
     return IpInfo();

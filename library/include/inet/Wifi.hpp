@@ -46,8 +46,9 @@ public:
       return *this;
     }
 
+    Security security() const { return static_cast<Security>(m_info.security); }
+
     API_ACCESS_MEMBER_FUNDAMENTAL(SsidInfo, u8, info, channel)
-    API_ACCESS_MEMBER_FUNDAMENTAL(SsidInfo, u8, info, security)
     API_ACCESS_MEMBER_FUNDAMENTAL(SsidInfo, s8, info, rssi)
 
     const wifi_ssid_info_t &info() const { return m_info; }
@@ -66,9 +67,8 @@ public:
 
     explicit AuthInfo(const wifi_auth_info_t &auth) : m_auth(auth) {}
 
-    explicit AuthInfo(const var::String &passphrase) {
-      strncpy((char *)(m_auth.password), passphrase.cstring(),
-              sizeof(m_auth.password));
+    explicit AuthInfo(const var::StringView passphrase) {
+      var::View(m_auth.password).copy(var::View(passphrase));
     }
 
     const wifi_auth_info_t &auth() const { return m_auth; }
@@ -190,28 +190,25 @@ public:
   Wifi();
   ~Wifi() { finalize(); }
 
-  int initialize() {
-    if (api().is_valid() == false) {
-      return -1;
-    }
-    return api()->init(&m_context);
-  }
-
-  void finalize() { api()->deinit(&m_context); }
-
-  int start_connect(const SsidInfo &ssid_info, const AuthInfo &auth);
+  Wifi &start_connect(const SsidInfo &ssid_info, const AuthInfo &auth);
 
   IpInfo connect(const SsidInfo &ssid_info, const AuthInfo &auth,
                  const chrono::MicroTime &timeout = 10_seconds);
 
-  int disconnect() { return api()->disconnect(m_context); }
+  Wifi &disconnect() {
+    API_RETURN_VALUE_IF_ERROR(*this);
+    API_SYSTEM_CALL("", api()->disconnect(m_context));
+    return *this;
+  }
 
   var::Vector<SsidInfo>
   scan(const ScanAttributes &attributes = ScanAttributes::get_default(),
        const chrono::MicroTime &timeout = 20_seconds);
 
-  int start_scan(const ScanAttributes &attributes) {
-    return api()->start_scan(m_context, &attributes.attributes());
+  Wifi &start_scan(const ScanAttributes &attributes) {
+    API_RETURN_VALUE_IF_ERROR(*this);
+    API_SYSTEM_CALL("", api()->start_scan(m_context, &attributes.attributes()));
+    return *this;
   }
 
   bool is_scan_busy() const {
@@ -229,22 +226,31 @@ public:
 
   var::Vector<SsidInfo> get_ssid_info_list();
 
-  int set_mode();
-  int set_mac_address(u8 mac_address[6]);
-  int get_mac_address(u8 mac_address[6]);
-  int get_factory_mac_address(u8 mac_address[6]);
-  int set_ip_address(const wifi_ip_info_t *static_ip_address);
+  Wifi &set_mode();
+  Wifi &set_mac_address(u8 mac_address[6]);
+  const Wifi &get_mac_address(u8 mac_address[6]);
+  const Wifi &get_factory_mac_address(u8 mac_address[6]);
+  Wifi &set_ip_address(const wifi_ip_info_t *static_ip_address);
 
-  int set_sleep_mode(void *context);
-  int sleep(void *context, u32 sleep_time_ms);
-  int set_device_name(void *context, const char *name);
-  int set_tx_power(void *context, u8 power_level);
+  Wifi &set_sleep_mode(void *context);
+  Wifi &sleep(void *context, u32 sleep_time_ms);
+  Wifi &set_device_name(void *context, const char *name);
+  Wifi &set_tx_power(void *context, u8 power_level);
 
   static WifiApi &api() { return m_api; }
 
 private:
   static WifiApi m_api;
   void *m_context;
+
+  int initialize() {
+    if (api().is_valid() == false) {
+      return -1;
+    }
+    return api()->init(&m_context);
+  }
+
+  void finalize() { api()->deinit(&m_context); }
 };
 
 } // namespace inet

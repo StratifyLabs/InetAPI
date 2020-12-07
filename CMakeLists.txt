@@ -15,6 +15,7 @@ if(NOT DEFINED IS_SDK)
 endif()
 
 
+add_subdirectory(lwip lwip)
 add_subdirectory(mbedtls mbedtls)
 add_subdirectory(library library)
 add_subdirectory(tests tests)
