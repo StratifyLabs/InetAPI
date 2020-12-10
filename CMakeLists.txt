@@ -15,7 +15,10 @@ if(NOT DEFINED IS_SDK)
 endif()
 
 
+if(SOS_IS_ARM)
 add_subdirectory(lwip lwip)
+endif()
+
 add_subdirectory(mbedtls mbedtls)
 add_subdirectory(library library)
 add_subdirectory(tests tests)

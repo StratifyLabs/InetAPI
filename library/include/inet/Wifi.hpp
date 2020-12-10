@@ -174,6 +174,8 @@ public:
 
     bool is_valid() const { return m_info.resd0 == WIFI_API_INFO_RESD; }
 
+    var::StringView ssid() const { return m_info.ssid; }
+
     IpInfo get_ip_info() const { return IpInfo(m_info.ip); }
 
     API_ACCESS_MEMBER_FUNDAMENTAL(Info, u8, info, security)

@@ -73,11 +73,11 @@
 /* Enable DHCP to test it */
 #define LWIP_DHCP                       1
 
-#if defined MCU_DEBUG
-#define LWIP_DEBUG 0
+#if defined SOS_DEBUG
+#define LWIP_DEBUG 1
 
-#define ETHARP_DEBUG 0x80
-#define TCPIP_DEBUG 0x80
+//#define ETHARP_DEBUG 0x80
+//#define TCPIP_DEBUG 0x80
 //#define DNS_DEBUG 0x80
 #define TCP_DEBUG 0x80
 #define TCP_INPUT_DEBUG 0x80
@@ -88,7 +88,7 @@
 //#define AUTOIP_DEBUG 0x80
 //#define API_LIB_DEBUG 0x80
 //#define API_MSG_DEBUG 0x80
-//#define NETIF_DEBUG 0x80
+#define NETIF_DEBUG 0x80
 #define IP_DEBUG 0x80
 //#define TCP_CWND_DEBUG 0x80
 //#define PBUF_DEBUG 0x80
