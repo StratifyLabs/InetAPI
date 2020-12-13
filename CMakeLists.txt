@@ -10,7 +10,7 @@ include(sos-sdk)
 
 project(InetAPI CXX)
 
-if(NOT DEFINED IS_SDK)
+if(NOT DEFINED API_IS_SDK)
 	include(API)
 endif()
 
