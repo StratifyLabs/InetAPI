@@ -478,7 +478,6 @@ HttpServer &HttpServer::run(void *context,
   while (is_stop == false) {
     m_request = Request(socket().gets());
     if (is_error()) {
-      printf("is error\n");
       break;
     }
 
