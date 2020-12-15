@@ -402,14 +402,14 @@ public:
     return *this;
   }
 
+  virtual Socket &socket() override { return m_socket; }
+  virtual const Socket &socket() const override { return m_socket; }
+
 protected:
 private:
   API_AB(HttpServer, running, true);
   var::Data m_incoming;
   Socket m_socket;
-
-  virtual Socket &socket() override { return m_socket; }
-  virtual const Socket &socket() const override { return m_socket; }
 };
 
 

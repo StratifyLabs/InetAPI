@@ -96,6 +96,8 @@ int SecureSocket::interface_bind_and_listen(
 
 int SecureSocket::interface_shutdown(const fs::OpenMode how) const {
   MCU_UNUSED_ARGUMENT(how);
+  // this should call shutdown() to shutdown for either reading or writing
+  // close() will still be called on deconstruction
   return internal_close();
 }
 

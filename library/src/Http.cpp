@@ -171,8 +171,8 @@ void Http::add_header_fields(var::StringView fields) {
 
 var::StringView Http::get_header_field(var::StringView key) const {
 
-  const size_t key_position
-    = header_fields().find(StackString64(key).to_upper());
+  const size_t key_position =
+      header_fields().find(StackString64(key).to_upper());
   if (key_position == StringView::npos) {
     return var::StringView();
   }
@@ -187,19 +187,19 @@ var::StringView Http::get_header_field(var::StringView key) const {
     return var::StringView();
   }
 
-  const size_t adjusted_value_position
-    = (header_fields().at(value_position + 1) == ' ') ? value_position + 2
+  const size_t adjusted_value_position =
+      (header_fields().at(value_position + 1) == ' ') ? value_position + 2
                                                       : value_position + 1;
 
-  return header_fields()(StringView::GetSubstring()
-                           .set_position(adjusted_value_position)
-                           .set_length(end_position - adjusted_value_position));
+  return header_fields()(
+      StringView::GetSubstring()
+          .set_position(adjusted_value_position)
+          .set_length(end_position - adjusted_value_position));
 }
 
 void Http::send(const Response &response) const {
-  socket().write(
-    response.to_string() + "\r\n" + header_fields() + "\r\n"
-    + (header_fields().is_empty() ? "\r\n" : ""));
+  socket().write(response.to_string() + "\r\n" + header_fields() + "\r\n" +
+                 (header_fields().is_empty() ? "\r\n" : ""));
 }
 
 void Http::send(const fs::FileObject &file,
@@ -207,25 +207,22 @@ void Http::send(const fs::FileObject &file,
   if (is_transfer_encoding_chunked()) {
     const size_t size = file.size();
     for (size_t i = 0; i < size; i++) {
-      const size_t page_size
-        = transfer_size() > (size - i) ? size - i : transfer_size();
+      const size_t page_size =
+          transfer_size() > (size - i) ? size - i : transfer_size();
       socket()
-        .write(var::String().format("%d\r\n", page_size))
-        .write(
-          file,
-          Socket::Write().set_page_size(page_size).set_size(page_size))
-        .write("\r\n");
+          .write(var::String().format("%d\r\n", page_size))
+          .write(file,
+                 Socket::Write().set_page_size(page_size).set_size(page_size))
+          .write("\r\n");
       i += transfer_size();
       API_RETURN_IF_ERROR();
     }
     return;
   }
 
-  socket().write(
-    file,
-    Socket::Write()
-      .set_page_size(transfer_size())
-      .set_progress_callback(progress_callback));
+  socket().write(file, Socket::Write()
+                           .set_page_size(transfer_size())
+                           .set_progress_callback(progress_callback));
 }
 
 void Http::send(const Request &request) const {
@@ -257,8 +254,8 @@ var::String Http::receive_header_fields() {
       const Http::HeaderField attribute = HeaderField::from_string(line);
 
       if (attribute.key() == "CONTENT-LENGTH") {
-        m_content_length
-          = static_cast<unsigned int>(attribute.value().to_integer());
+        m_content_length =
+            static_cast<unsigned int>(attribute.value().to_integer());
       }
 
       if (attribute.key() == "CONTENT-TYPE") {
@@ -270,18 +267,17 @@ var::String Http::receive_header_fields() {
         }
       }
 
-      if (
-        attribute.key() == "TRANSFER-ENCODING"
-        && (attribute.value() == "CHUNKED")) {
+      if (attribute.key() == "TRANSFER-ENCODING" &&
+          (attribute.value() == "CHUNKED")) {
         m_is_transfer_encoding_chunked = true;
       }
     }
 
-  } while (line.length() > 2
-           && (socket().is_success())); // while reading the header
+  } while (line.length() > 2 &&
+           (socket().is_success())); // while reading the header
 
   m_is_header_dirty = true;
-	return result.to_upper();
+  return result.to_upper();
 }
 
 void Http::receive(const fs::FileObject &file,
@@ -315,6 +311,7 @@ void Http::receive(const fs::FileObject &file,
                              .set_size(m_content_length)
                              .set_progress_callback(progress_callback));
 
+    printf("is stream events %d %d\n", is_stream_events(), return_value());
   } while (is_stream_events() && return_value() > 0);
 }
 
@@ -454,7 +451,7 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
   const size_t colon_pos = string.find(":");
 
   const KeyString key = std::move(
-    KeyString(string.get_substring_with_length(colon_pos)).to_upper());
+      KeyString(string.get_substring_with_length(colon_pos)).to_upper());
 
   String value;
   if (colon_pos != String::npos) {
@@ -464,10 +461,10 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
     }
 
     value.replace(String::Replace().set_old_string("\r"))
-      .replace(String::Replace().set_old_string("\n"))
-      .to_upper();
+        .replace(String::Replace().set_old_string("\n"))
+        .to_upper();
   }
-	return Http::HeaderField(var::String(key.cstring()), value);
+  return Http::HeaderField(var::String(key.cstring()), value);
 }
 
 HttpServer &HttpServer::run(void *context,
@@ -481,6 +478,7 @@ HttpServer &HttpServer::run(void *context,
   while (is_stop == false) {
     m_request = Request(socket().gets());
     if (is_error()) {
+      printf("is error\n");
       break;
     }
 
