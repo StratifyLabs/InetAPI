@@ -52,76 +52,84 @@ public:
     self->m_is_listening = true;
 
     HttpServer(server_listen_socket.accept(accept_address))
-      .listen(
-        self,
-        [](HttpServer *server, void *context, const Http::Request &request)
-          -> Http::IsStop {
-          // handle the request
-          UnitTest *self = reinterpret_cast<UnitTest *>(context);
+        .run(self,
+             [](HttpServer *server, void *context,
+                const Http::Request &request) -> Http::IsStop {
+               // handle the request
+               UnitTest *self = reinterpret_cast<UnitTest *>(context);
 
-          self->printer().key(
-            "requestMethod",
-            Http::to_string(request.method()).string_view());
+               self->printer().key(
+                   "requestMethod",
+                   Http::to_string(request.method()).string_view());
 
-          const StringView hello_world = "Hello World";
-          DataFile incoming;
+               const StringView hello_world = "Hello World";
+               DataFile incoming;
 
-          const bool is_connection_close
-            = server->get_header_field("CONNECTION") == "CLOSE";
+               const bool is_connection_close =
+                   server->get_header_field("CONNECTION") == "CLOSE";
 
-          printer().key("CONNECTION", server->get_header_field("CONNECTION"));
+               printer().key("CONNECTION",
+                             server->get_header_field("CONNECTION"));
 
-          switch (request.method()) {
-          case Http::Method::null:
-            server->receive(NullFile())
-              .send(Http::Response(
-                server->http_version(),
-                Http::Status::bad_request));
-            break;
+               switch (request.method()) {
+               case Http::Method::null:
+                 server->receive(NullFile())
+                     .send(Http::Response(server->http_version(),
+                                          Http::Status::bad_request));
+                 break;
 
-          case Http::Method::get:
-            server->receive(NullFile())
-              .add_header_field("content-length", NumberString(hello_world.length()))
-              .send(Http::Response(server->http_version(), Http::Status::ok))
-              .send(ViewFile(View(hello_world)));
+               case Http::Method::get:
+                 server->receive(NullFile())
+                     .add_header_field("content-length",
+                                       NumberString(hello_world.length()))
+                     .send(Http::Response(server->http_version(),
+                                          Http::Status::ok))
+                     .send(ViewFile(View(hello_world)));
 
-            break;
+                 break;
 
-          case Http::Method::post:
-            server->receive(incoming)
-              .add_header_field("content-length", NumberString(incoming.size()))
-              .send(Http::Response(server->http_version(), Http::Status::ok))
-              .send(incoming.seek(0));
+               case Http::Method::post:
+                 server->receive(incoming)
+                     .add_header_field("content-length",
+                                       NumberString(incoming.size()))
+                     .send(Http::Response(server->http_version(),
+                                          Http::Status::ok))
+                     .send(incoming.seek(0));
 
-            break;
+                 break;
 
-          case Http::Method::put:
-            server->receive(incoming)
-              .add_header_field("content-length", NumberString(incoming.size()))
-              .send(Http::Response(server->http_version(), Http::Status::ok))
-              .send(incoming.seek(0));
-            break;
+               case Http::Method::put:
+                 server->receive(incoming)
+                     .add_header_field("content-length",
+                                       NumberString(incoming.size()))
+                     .send(Http::Response(server->http_version(),
+                                          Http::Status::ok))
+                     .send(incoming.seek(0));
+                 break;
 
-          case Http::Method::patch:
-            server->receive(incoming)
-              .add_header_field("content-length", NumberString(incoming.size()))
-              .send(Http::Response(server->http_version(), Http::Status::ok))
-              .send(incoming.seek(0));
-            break;
+               case Http::Method::patch:
+                 server->receive(incoming)
+                     .add_header_field("content-length",
+                                       NumberString(incoming.size()))
+                     .send(Http::Response(server->http_version(),
+                                          Http::Status::ok))
+                     .send(incoming.seek(0));
+                 break;
 
-          case Http::Method::delete_:
-            break;
-          case Http::Method::head:
-            break;
-          case Http::Method::options:
-            break;
-          case Http::Method::trace:
-            break;
-          }
+               case Http::Method::delete_:
+                 break;
+               case Http::Method::head:
+                 break;
+               case Http::Method::options:
+                 break;
+               case Http::Method::trace:
+                 break;
+               }
 
-          self->printer().key_bool("close", is_connection_close);
-          return is_connection_close ? Http::IsStop::yes : Http::IsStop::no;
-        });
+               self->printer().key_bool("close", is_connection_close);
+               return is_connection_close ? Http::IsStop::yes
+                                          : Http::IsStop::no;
+             });
 
     self->printer().key("connection", StringView("--close--"));
     return true;

@@ -314,6 +314,8 @@ public:
     return *this;
   }
 
+  bool is_valid() const { return m_socket != SOCKET_INVALID; }
+
   virtual ~Socket();
 
   const Socket &connect(const SocketAddress &address) const;
@@ -396,7 +398,7 @@ protected:
   virtual int interface_shutdown(const fs::OpenMode how) const;
 
   int interface_open(const char *path, int flags, int mode) const { return 0; }
-  int interface_close(int fd) const;
+  int interface_close() const;
 
   int interface_lseek(int location, int whence) const override final {
     return 0;

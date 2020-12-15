@@ -187,11 +187,6 @@ public:
   };
 
   Http(var::StringView http_version);
-
-  /*! \details Returns a reference to the header that is returned
-   * by the request.
-   *
-   */
   const var::String &traffic() const { return m_traffic; }
 
   var::StringView get_header_field(var::StringView key) const;
@@ -372,12 +367,9 @@ public:
   HttpServer(Socket &&socket, var::StringView http_version = "HTTP/1.1")
     : Http(http_version), m_socket(std::move(socket)) {}
 
-  HttpServer &listen(
-    void *context,
-    IsStop (*respond)(
-      HttpServer *server_self,
-      void *context,
-      const Http::Request &request));
+  HttpServer &run(void *context,
+                  IsStop (*respond)(HttpServer *server_self, void *context,
+                                    const Http::Request &request));
 
   HttpServer &add_header_field(var::StringView key, var::StringView value) {
     Http::add_header_field(key, value);
@@ -422,5 +414,10 @@ private:
 
 
 } // namespace inet
+
+namespace printer {
+Printer &operator<<(Printer &printer, const inet::Http::Request &value);
+Printer &operator<<(Printer &printer, const inet::Http::Response &value);
+} // namespace printer
 
 #endif // SAPI_INET_HTTP_HPP_

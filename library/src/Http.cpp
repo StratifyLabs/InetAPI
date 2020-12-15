@@ -1,11 +1,12 @@
 /*! \file */ // Copyright 2011-2020 Tyler Gilbert and Stratify Labs, Inc; see
              // LICENSE.md for rights.
 
+#include <fs.hpp>
+#include <printer/Printer.hpp>
+#include <var.hpp>
+
 #include "inet/Http.hpp"
-#include "fs.hpp"
 #include "inet/Url.hpp"
-#include "printer.hpp"
-#include "var.hpp"
 
 #define SHOW_HEADERS 0
 #if defined __link
@@ -13,6 +14,16 @@
 #else
 #define AGGREGATE_TRAFFIC(msg)
 #endif
+
+namespace printer {
+Printer &operator<<(Printer &printer, const inet::Http::Request &value) {
+  return printer.key("method", inet::Http::to_string(value.method()))
+      .key("path", value.path());
+}
+Printer &operator<<(Printer &printer, const inet::Http::Response &value) {
+  return printer.key("status", inet::Http::to_string(value.status()));
+}
+} // namespace printer
 
 using namespace inet;
 
@@ -118,20 +129,20 @@ var::KeyString Http::to_string(Method method) {
 }
 
 Http::Method Http::method_from_string(var::StringView string) {
-  const var::KeyString input = KeyString(string).to_upper();
-  if (StringView(input.cstring()) == "GET") {
+  const auto input = KeyString(string).to_upper();
+  if (input == "GET") {
     return Method::get;
-  } else if (StringView(input.cstring()) == "POST") {
+  } else if (input == "POST") {
     return Method::post;
-  } else if (StringView(input.cstring()) == "PUT") {
+  } else if (input == "PUT") {
     return Method::put;
-  } else if (StringView(input.cstring()) == "HEAD") {
+  } else if (input == "HEAD") {
     return Method::head;
-  } else if (StringView(input.cstring()) == "DELETE") {
+  } else if (input == "DELETE") {
     return Method::delete_;
-  } else if (StringView(input.cstring()) == "PATCH") {
+  } else if (input == "PATCH") {
     return Method::patch;
-  } else if (StringView(input.cstring()) == "OPTIONS") {
+  } else if (input == "OPTIONS") {
     return Method::options;
   }
   return Method::null;
@@ -459,25 +470,23 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
 	return Http::HeaderField(var::String(key.cstring()), value);
 }
 
-HttpServer &HttpServer::listen(
-  void *context,
-  IsStop (*respond)(
-    HttpServer *server_self,
-    void *context,
-    const Http::Request &request)) {
+HttpServer &HttpServer::run(void *context,
+                            IsStop (*respond)(HttpServer *server_self,
+                                              void *context,
+                                              const Http::Request &request)) {
 
   // read socket data
 
   bool is_stop = false;
   while (is_stop == false) {
     m_request = Request(socket().gets());
+    if (is_error()) {
+      break;
+    }
+
     set_header_fields(receive_header_fields());
     // execute the method
-    if (respond) {
-      if (respond(this, context, m_request) == IsStop::yes) {
-        is_stop = true;
-      }
-    }
+    is_stop = respond && (respond(this, context, m_request) == IsStop::yes);
   }
 
   return *this;

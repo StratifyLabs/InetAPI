@@ -159,7 +159,9 @@ int Socket::finalize() {
   return 0;
 }
 
-Socket::~Socket() { interface_close(0); }
+Socket::~Socket() {
+  interface_close();
+}
 
 const Socket &Socket::bind(const SocketAddress &address) const {
   API_RETURN_VALUE_IF_ERROR(*this);
@@ -223,8 +225,7 @@ int Socket::interface_connect(const SocketAddress &address) const {
     static_cast<int>(address.length())));
 }
 
-int Socket::interface_close(int fd) const {
-  MCU_UNUSED_ARGUMENT(fd);
+int Socket::interface_close() const {
   int result = 0;
   if (m_socket != SOCKET_INVALID) {
 #if defined __win32
