@@ -1,4 +1,6 @@
-﻿#ifndef INETAPI_INET_IPADDRESS_HPP
+﻿// Copyright 2016-2021 Tyler Gilbert and Stratify Labs, Inc; see LICENSE.md
+
+#ifndef INETAPI_INET_IPADDRESS_HPP
 #define INETAPI_INET_IPADDRESS_HPP
 
 #if defined __win32

@@ -1,5 +1,4 @@
-/*! \file */ // Copyright 2011-2020 Tyler Gilbert and Stratify Labs, Inc; see
-             // LICENSE.md for rights.
+// Copyright 2016-2021 Tyler Gilbert and Stratify Labs, Inc; see LICENSE.md
 
 #include <fs.hpp>
 #include <printer/Printer.hpp>
@@ -228,7 +227,7 @@ void Http::send(const fs::FileObject &file,
 void Http::send(const Request &request) const {
 #if SHOW_HEADERS
   printf("%s\n%s\n", request.to_string().cstring(),
-         header_fields().get_string().cstring());
+         header_fields().to_string().cstring());
 #endif
   socket().write(request.to_string() + "\r\n" + header_fields() + "\r\n");
 }
@@ -437,7 +436,7 @@ HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
     socket().connect(address);
     if (is_success()) {
       m_is_connected = true;
-      m_host = domain_name.get_string();
+      m_host = domain_name.to_string();
       return (*this);
     }
     API_RESET_ERROR();
