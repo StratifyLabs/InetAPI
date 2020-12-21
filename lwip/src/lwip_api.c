@@ -298,7 +298,6 @@ int lwip_api_startup(const void *socket_api) {
 
   netif_set_default(config->netif_config[0].lwip_netif);
 
-  SOS_DEBUG_LINE_TRACE();
 
   // allow NETIF to come up
   usleep(250 * 1000);
