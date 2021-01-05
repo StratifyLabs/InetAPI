@@ -70,6 +70,7 @@ public:
     explicit AuthInfo(const wifi_auth_info_t &auth) : m_auth(auth) {}
 
     explicit AuthInfo(const var::StringView passphrase) {
+      m_auth = {0};
       var::View(m_auth.password).copy(var::View(passphrase));
     }
 

@@ -310,7 +310,6 @@ void Http::receive(const fs::FileObject &file,
                              .set_size(m_content_length)
                              .set_progress_callback(progress_callback));
 
-    printf("is stream events %d %d\n", is_stream_events(), return_value());
   } while (is_stream_events() && return_value() > 0);
 }
 
