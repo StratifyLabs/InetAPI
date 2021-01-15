@@ -141,17 +141,17 @@ sys_thread_t sys_thread_new(const char *name, lwip_thread_fn function,
     sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to set stack size");
   }
 
-#if 0
-    if( pthread_attr_setschedpolicy(&attr, SCHED_RR) < 0 ){
-        sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to set policy");
-    }
+#if 1
+  if (pthread_attr_setschedpolicy(&attr, SCHED_FIFO) < 0) {
+    sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to set policy");
+  }
 
-    struct sched_param param;
-    param.sched_priority = prio;
+  struct sched_param param;
+  param.sched_priority = prio;
 
-    if( pthread_attr_setschedparam(&attr, &param) < 0 ){
-        sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to set priority");
-    }
+  if (pthread_attr_setschedparam(&attr, &param) < 0) {
+    sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to set priority");
+  }
 #endif
 
   result = pthread_create(&tmp, &attr, (void *(*)(void *))function, arg);
@@ -391,7 +391,7 @@ static struct sys_sem *sys_sem_new_internal(u8_t count) {
       return 0;
     }
     // this will be sem_init()
-    sos_debug_log_info(SOS_DEBUG_SOCKET, "SEM Init %p %p", sem, sem->sem);
+    // sos_debug_log_info(SOS_DEBUG_SOCKET, "SEM Init %p %p", sem, sem->sem);
     sem_init(sem->sem, 1, count);
   }
   return sem;

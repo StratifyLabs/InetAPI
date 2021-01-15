@@ -238,7 +238,7 @@ err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
                           errno);
       return ERR_IF;
     }
-    sos_debug_log_info(SOS_DEBUG_SOCKET, "sent:%d", result);
+    // sos_debug_log_info(SOS_DEBUG_SOCKET, "sent:%d", result);
   }
 
   MIB2_STATS_NETIF_ADD(netif, ifoutoctets, p->tot_len);
@@ -345,7 +345,6 @@ int lwip_api_add_netif(const lwip_api_netif_config_t *netif_config) {
 void lwip_input_thread(void *arg) {
   // this thread monitors each network interface for incoming traffic
   struct netif *netif = (struct netif *)arg;
-  int input_result = 0;
 
   sos_debug_log_info(SOS_DEBUG_SOCKET, "Start thread %s", netif->hostname);
 
@@ -363,7 +362,7 @@ void lwip_input_thread(void *arg) {
     dhcp_start(netif);
 
     while (lwip_api_netif_is_link_up(netif) > 0) {
-      input_result = lwip_api_netif_input(netif);
+      const int input_result = lwip_api_netif_input(netif);
 
       // ERR_OK means data arrived -- keep reading the if until no data arrives
       // -- then sleep

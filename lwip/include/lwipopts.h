@@ -50,6 +50,7 @@
 #define MEM_ALIGNMENT 4
 #define ETH_PAD_SIZE 0
 #define LWIP_SOCKET_OFFSET OPEN_MAX
+#define TCPIP_THREAD_PRIO 10
 
 #define LWIP_POSIX_SOCKETS_IO_NAMES 0
 #define LWIP_COMPAT_SOCKETS 0
@@ -90,7 +91,7 @@
 //#define API_LIB_DEBUG 0x80
 //#define API_MSG_DEBUG 0x80
 //#define NETIF_DEBUG 0x80
-//#define IP_DEBUG 0x80
+#define IP_DEBUG 0x80
 //#define TCP_CWND_DEBUG 0x80
 //#define PBUF_DEBUG 0x80
 #define LWIP_DBG_MIN_LEVEL 0
