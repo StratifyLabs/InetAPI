@@ -69,7 +69,7 @@ AddressInfo::AddressInfo(const Construct &options) {
   for (struct addrinfo *info = info_start; info != nullptr;
        info = info->ai_next) {
     m_list.push_back(
-        SocketAddress(info->ai_addr, info->ai_addrlen, info->ai_canonname)
+        SocketAddress(info->ai_addr, info->ai_addr->sa_len, info->ai_canonname)
             .set_protocol(static_cast<Protocol>(info->ai_protocol))
             .set_type(static_cast<Type>(info->ai_socktype)));
   }
@@ -222,12 +222,14 @@ int Socket::interface_close() const {
 }
 
 int Socket::interface_read(void *buf, int nbyte) const {
-  return decode_socket_return(::recv(m_socket,
+  const int result =
+      decode_socket_return(::recv(m_socket,
 #if defined __win32
-                                     static_cast<char *>
+                                  static_cast<char *>
 #endif
-                                     (buf),
-                                     nbyte, static_cast<int>(message_flags())));
+                                  (buf),
+                                  nbyte, static_cast<int>(message_flags())));
+  return result;
 }
 
 int Socket::interface_write(const void *buf, int nbyte) const {

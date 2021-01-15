@@ -14,7 +14,6 @@
 
 namespace inet {
 
-
 class SocketFlags {
 public:
   enum class Domain {
@@ -151,10 +150,9 @@ API_OR_NAMED_FLAGS_OPERATOR(SocketFlags, MessageFlags)
 class SocketAddress : public SocketFlags {
 public:
   SocketAddress() = default;
-  explicit SocketAddress(
-    const socket_address_union_t sockaddr,
-    var::StringView canon_name = "")
-    : m_sockaddr(sockaddr), m_canon_name(canon_name) {}
+  explicit SocketAddress(const socket_address_union_t sockaddr,
+                         var::StringView canon_name = "")
+      : m_sockaddr(sockaddr), m_canon_name(canon_name) {}
 
   const var::String &canon_name() const { return m_canon_name; }
   size_t length() const { return m_sockaddr.size; }
@@ -178,10 +176,9 @@ public:
 
   var::NumberString get_address_string() const {
     if (m_sockaddr.size == sizeof(struct sockaddr_in)) {
-			return
-				IpAddress4(m_sockaddr.sockaddr_in.sin_addr.s_addr).to_string();
+      return IpAddress4(m_sockaddr.sockaddr_in.sin_addr.s_addr).to_string();
     }
-		return IpAddress6(m_sockaddr.sockaddr_in6.sin6_addr).to_string();
+    return IpAddress6(m_sockaddr.sockaddr_in6.sin6_addr).to_string();
   }
 
   const struct sockaddr *to_sockaddr() const { return &m_sockaddr.sockaddr; }
@@ -196,10 +193,8 @@ private:
   API_AF(SocketAddress, Type, type, Type::raw);
   API_AF(SocketAddress, Protocol, protocol, Protocol::raw);
 
-  explicit SocketAddress(
-    const void *addr,
-    size_t length,
-    const char *canon_name) {
+  explicit SocketAddress(const void *addr, size_t length,
+                         const char *canon_name) {
     memcpy(&m_sockaddr.sockaddr, addr, length);
     m_sockaddr.size = length;
     if (canon_name != nullptr) {
@@ -232,7 +227,6 @@ class SocketAddress6 : public SocketAddress {
 public:
   SocketAddress6() { m_sockaddr.size = sizeof(struct sockaddr_in6); }
 
-
   SocketAddress6 &set_family(Family value) {
     m_sockaddr.sockaddr_in6.sin6_family = static_cast<int>(value);
     return *this;
@@ -245,7 +239,7 @@ public:
 
   SocketAddress6 &set_address(IpAddress6 address) {
     var::View(m_sockaddr.sockaddr_in6.sin6_addr)
-      .copy(var::View(address.address()));
+        .copy(var::View(address.address()));
     return *this;
   }
 };
@@ -272,7 +266,7 @@ private:
 class SocketOption : public SocketFlags {
 public:
   SocketOption(Level level, NameFlags name, int value = 0)
-    : m_level(level), m_name(name) {
+      : m_level(level), m_name(name) {
     m_size = sizeof(value);
   }
 
@@ -300,10 +294,8 @@ class Socket : public fs::FileAccess<Socket>, public SocketFlags {
 public:
   Socket();
 
-  explicit Socket(
-    Domain domain,
-    Type type = Type::stream,
-    Protocol protocol = Protocol::ip);
+  explicit Socket(Domain domain, Type type = Type::stream,
+                  Protocol protocol = Protocol::ip);
 
   explicit Socket(const SocketAddress &socket_address);
 
@@ -322,8 +314,8 @@ public:
     return API_CONST_CAST_SELF(Socket, connect, address);
   }
 
-  const Socket &
-  bind_and_listen(const SocketAddress &address, int backlog = 4) const;
+  const Socket &bind_and_listen(const SocketAddress &address,
+                                int backlog = 4) const;
   Socket &bind_and_listen(const SocketAddress &address, int backlog = 4) {
     return API_CONST_CAST_SELF(Socket, bind_and_listen, address, backlog);
   }
@@ -351,18 +343,16 @@ public:
 
   SocketAddress receive_from(void *buf, int nbyte) const;
 
-  const Socket &send_to(
-    const SocketAddress &socket_address,
-    const void *buf,
-    int nbyte) const;
+  const Socket &send_to(const SocketAddress &socket_address, const void *buf,
+                        int nbyte) const;
 
-  Socket &
-  send_to(const SocketAddress &socket_address, const void *buf, int nbyte) {
+  Socket &send_to(const SocketAddress &socket_address, const void *buf,
+                  int nbyte) {
     return API_CONST_CAST_SELF(Socket, send_to, socket_address, buf, nbyte);
   }
 
-  const Socket &
-  send_to(const SocketAddress &socket_address, var::View data) const {
+  const Socket &send_to(const SocketAddress &socket_address,
+                        var::View data) const {
     return send_to(socket_address, data.to_const_void(), data.size());
   }
 
@@ -388,11 +378,10 @@ protected:
   // socket on all other platforms is a file handler
 #endif
 
-
   virtual int interface_connect(const SocketAddress &address) const;
 
-  virtual int
-  interface_bind_and_listen(const SocketAddress &address, int backlog) const;
+  virtual int interface_bind_and_listen(const SocketAddress &address,
+                                        int backlog) const;
 
   virtual int interface_shutdown(const fs::OpenMode how) const;
 
@@ -408,10 +397,9 @@ protected:
   }
 
   virtual int interface_read(void *buf, int nbyte) const override;
-  virtual int
-  interface_write(const void *buf, int nbyte) const override;
+  virtual int interface_write(const void *buf, int nbyte) const override;
 
-	int decode_socket_return(long long int value) const;
+  int decode_socket_return(long long int value) const;
 
 private:
   mutable SOCKET_T m_socket = SOCKET_INVALID;

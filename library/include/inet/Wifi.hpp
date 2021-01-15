@@ -41,10 +41,10 @@ public:
 
     bool is_valid() const { return m_info.ssid[0] != 0; }
 
-    var::String get_name() const { return var::String(m_info.ssid); }
+    var::StringView get_name() const { return m_info.ssid; }
 
-    SsidInfo &set_name(const var::String &value) {
-      strncpy(m_info.ssid, value.cstring(), sizeof(m_info.ssid));
+    SsidInfo &set_name(const var::StringView value) {
+      var::View(m_info.ssid).fill(0).pop_back().copy(var::View(value));
       return *this;
     }
 

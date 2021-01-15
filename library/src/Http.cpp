@@ -234,7 +234,7 @@ void Http::send(const Request &request) const {
 
 int Http::get_chunk_size() const {
   auto line = socket().gets();
-  return line.to_unsigned_long(StringView::Base::hexadecimal);
+  return line.string_view().to_unsigned_long(StringView::Base::hexadecimal);
 }
 
 var::String Http::receive_header_fields() {
@@ -475,6 +475,7 @@ HttpServer &HttpServer::run(void *context,
   bool is_stop = false;
   while (is_stop == false) {
     m_request = Request(socket().gets());
+    printer::Printer().object("request", m_request);
     if (is_error()) {
       break;
     }

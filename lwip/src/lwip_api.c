@@ -3,6 +3,7 @@
 #include <sos/debug.h>
 #include <sos/dev/netif.h>
 #include <sos/fs/sysfs.h>
+#include <unistd.h>
 
 #include <cortexm/cortexm.h>
 #include <cortexm/task.h>
@@ -259,7 +260,11 @@ err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
 void tcpip_init_done(void *args) {
   MCU_UNUSED_ARGUMENT(args);
   usleep(800 * 1000);
-  sos_debug_log_info(SOS_DEBUG_SOCKET, "TCPIP INIT DONE");
+  sos_debug_log_info(SOS_DEBUG_SOCKET, "TCPIP INIT DONE %d", pthread_self());
+  if (setuid(SYSFS_ROOT) < 0) {
+    sos_debug_log_info(SOS_DEBUG_SOCKET,
+                       "failed to set root user -- may crash later");
+  }
 }
 
 int lwip_api_startup(const void *socket_api) {
@@ -267,8 +272,6 @@ int lwip_api_startup(const void *socket_api) {
   const lwip_api_config_t *config =
       ((const sos_socket_api_t *)socket_api)->config;
   u32 i;
-
-  sys_init();
 
   if (config->netif_config_count == 0) {
     sos_debug_log_error(SOS_DEBUG_SOCKET, "No network interfaces");
