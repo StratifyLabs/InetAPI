@@ -10,6 +10,9 @@ include(sos-sdk)
 
 project(InetAPI CXX)
 
+set(SOS_ARCH v7em_f5dh)
+set(SOS_ARCH_LIST "")
+
 if(NOT DEFINED API_IS_SDK)
 	include(API)
 endif()

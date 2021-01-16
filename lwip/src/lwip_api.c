@@ -3,6 +3,7 @@
 #include <sos/debug.h>
 #include <sos/dev/netif.h>
 #include <sos/fs/sysfs.h>
+#include <sos/sos.h>
 #include <unistd.h>
 
 #include <cortexm/cortexm.h>
@@ -336,7 +337,8 @@ int lwip_api_add_netif(const lwip_api_netif_config_t *netif_config) {
   netif_set_status_callback(netif, netif_config->netif_status_callback);
 
   // create a thread to monitor the new interface - for up/down, etc
-  sys_thread_new("netif", lwip_input_thread, netif, 1024 * 2, 0);
+  sys_thread_new("netif", lwip_input_thread, netif, 1024 * 2,
+                 TCPIP_THREAD_PRIO);
 
   sos_debug_log_info(SOS_DEBUG_SOCKET, "Added netif %s", netif->hostname);
   return 0;

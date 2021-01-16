@@ -66,6 +66,9 @@
 #define LWIP_SO_SNDTIMEO 1
 #define LWIP_SO_RCVBUF 1
 #define LWIP_MPU_COMPATIBLE 1
+#define LWIP_CHECKSUM_ON_COPY 1
+
+#define ARP_TABLE_SIZE 64
 
 //#define LWIP_ERRNO_INCLUDE <errno.h>
 
@@ -82,6 +85,7 @@
 //#define TCPIP_DEBUG 0x80
 //#define DNS_DEBUG 0x80
 //#define TCP_DEBUG 0x80
+#define TCP_OUTPUT_DEBUG 0x80
 //#define TCP_INPUT_DEBUG 0x80
 //#define TRACE_DEBUG 0x80
 //#define SOCKETS_DEBUG 0x80
@@ -91,7 +95,7 @@
 //#define API_LIB_DEBUG 0x80
 //#define API_MSG_DEBUG 0x80
 //#define NETIF_DEBUG 0x80
-#define IP_DEBUG 0x80
+//#define IP_DEBUG 0x80
 //#define TCP_CWND_DEBUG 0x80
 //#define PBUF_DEBUG 0x80
 #define LWIP_DBG_MIN_LEVEL 0
@@ -118,16 +122,17 @@
 #define CHECKSUM_CHECK_ICMP 1
 #define CHECKSUM_CHECK_ICMP6 1
 
-#define MEM_SIZE 16384
+#define MEM_SIZE 24576
+
 #define MEMP_NUM_TCP_SEG 2
-#define TCP_MSS 1460
-#define TCP_WND (2 * TCP_MSS)
-#define TCP_SND_BUF (2 * TCP_MSS)
+#define TCP_MSS 1500
+#define TCP_WND (4 * TCP_MSS)
+#define TCP_SND_BUF (4 * TCP_MSS)
 #define TCP_SND_QUEUELEN ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / (TCP_MSS))
 #define TCP_OVERSIZE TCP_MSS
-#define LWIP_WND_SCALE 1
+#define LWIP_WND_SCALE 0
 #define TCP_RCV_SCALE 0
-#define PBUF_POOL_SIZE 4
+#define PBUF_POOL_SIZE 12
 
 #define TCPIP_THREAD_STACKSIZE 2048
 

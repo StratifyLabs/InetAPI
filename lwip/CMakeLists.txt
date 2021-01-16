@@ -9,6 +9,8 @@ sos_sdk_add_subdirectory(INTERFACE_SOURCES include)
 
 add_library(${RELEASE_TARGET} STATIC)
 
+set(LWIP_VERSION "2.1.2")
+
 set_property(TARGET ${RELEASE_TARGET} PROPERTY CXX_STANDARD 17)
 
 target_sources(${RELEASE_TARGET}
@@ -20,6 +22,9 @@ target_sources(${RELEASE_TARGET}
 
 target_include_directories(${RELEASE_TARGET}
 	PUBLIC
+	$<INSTALL_INTERFACE:include/lwip>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lwip-${LWIP_VERSION}/src/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	PRIVATE
 	)
 
@@ -42,6 +47,10 @@ sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
 
 
 install(DIRECTORY include/
+	DESTINATION include/${PROJECT_NAME}
+	PATTERN CMakelists.txt EXCLUDE)
+
+install(DIRECTORY lwip-${LWIP_VERSION}/src/include/lwip/
 	DESTINATION include/${PROJECT_NAME}
 	PATTERN CMakelists.txt EXCLUDE)
 
