@@ -22,7 +22,6 @@ target_sources(${RELEASE_TARGET}
 
 target_include_directories(${RELEASE_TARGET}
 	PUBLIC
-	$<INSTALL_INTERFACE:include/lwip>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lwip-${LWIP_VERSION}/src/include>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
 	PRIVATE

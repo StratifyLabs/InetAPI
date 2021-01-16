@@ -410,14 +410,13 @@ err_t sys_sem_new(struct sys_sem **sem, u8_t count) {
 u32_t sys_arch_sem_wait(struct sys_sem **s, u32_t timeout) {
 
   // this will be sem_timedwait()
-  struct timespec now;
-  struct timespec then;
-  struct timespec abs_timeout;
-
   struct sys_sem *sem = *s;
 
-  clock_gettime(CLOCK_REALTIME, &now);
+  u64 start = sos_realtime();
   if (timeout > 0) {
+    struct timespec now;
+    struct timespec abs_timeout;
+    clock_gettime(CLOCK_REALTIME, &now);
     u32 seconds = timeout / 1000;
     u32 milliseconds = timeout % 1000;
     abs_timeout.tv_nsec = now.tv_nsec + milliseconds * 1000000UL;
@@ -427,6 +426,7 @@ u32_t sys_arch_sem_wait(struct sys_sem **s, u32_t timeout) {
       abs_timeout.tv_nsec -= 1000000000UL;
       abs_timeout.tv_sec++;
     }
+
     int result = sem_timedwait(sem->sem, &abs_timeout);
     if (result < 0) {
       // did not get the semaphore in time
@@ -434,15 +434,13 @@ u32_t sys_arch_sem_wait(struct sys_sem **s, u32_t timeout) {
     }
   } else {
     if (sem_wait(sem->sem) < 0) {
+      sos_debug_printf("failed to block---\n");
       sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to wait semaphore %d",
                           errno);
     }
   }
-
-  clock_gettime(CLOCK_REALTIME, &then);
-  abs_timeout.tv_sec = then.tv_sec - now.tv_sec;
-  abs_timeout.tv_nsec = then.tv_nsec - now.tv_nsec;
-  return abs_timeout.tv_sec * 1000UL + abs_timeout.tv_nsec / 1000000UL;
+  u64 end = sos_realtime();
+  return ((u32)(start - end)) / 1000UL;
 }
 /*-----------------------------------------------------------------------------------*/
 void sys_sem_signal(struct sys_sem **s) {
@@ -480,6 +478,15 @@ void sys_init(void) {
   sos_debug_log_info(SOS_DEBUG_SOCKET, "Sys Init %p", &threads_mutex);
   initialize_mutex(&threads_mutex);
 }
+
+void sys_arch_msleep(u32_t ms) {
+  if (ms < 1000) {
+    usleep(ms * 1000);
+  } else {
+    sleep(ms / 1000);
+  }
+}
+
 /*-----------------------------------------------------------------------------------*/
 #if SYS_LIGHTWEIGHT_PROT
 /** sys_prot_t sys_arch_protect(void)
