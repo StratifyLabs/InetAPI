@@ -130,7 +130,7 @@
 #define MEMP_NUM_TCP_SEG 16
 #define TCP_LISTEN_BACKLOG 8
 #define TCP_TTL 255
-#define TCP_MSS (512 * 3)
+#define TCP_MSS (1500)
 #define TCP_MAXRTX 12
 #define TCP_SYNMAXRTX 6
 
@@ -150,7 +150,7 @@
 #define TCP_RCV_SCALE 1
 #define PBUF_POOL_SIZE 16
 
-#define TCP_TMR_INTERVAL 125
+#define TCP_TMR_INTERVAL 75
 
 #define TCPIP_THREAD_STACKSIZE 2048
 
