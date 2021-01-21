@@ -10,21 +10,21 @@ include(sos-sdk)
 
 project(InetAPI CXX)
 
-set(SOS_ARCH v7em_f5dh)
-set(SOS_ARCH_LIST "")
-
 if(NOT DEFINED API_IS_SDK)
 	include(API)
 endif()
 
-OPTION(IS_MBEDTLS ON)
-OPTION(IS_LWIP ON)
-OPTION(IS_TESTS ON)
-
 if(SOS_IS_ARM)
-	if(ON)
-		add_subdirectory(lwip lwip)
-	endif()
+	set(SOS_ARCH v7em_f5dh)
+	set(SOS_ARCH_LIST "")
+endif()
+
+option(IS_MBEDTLS "Build mbedtls" ON)
+option(IS_LWIP "Build lwip" ON)
+option(IS_TESTS "Build tests" ON)
+
+if(SOS_IS_ARM AND IS_LWIP)
+	add_subdirectory(lwip lwip)
 endif()
 
 if(IS_MBEDTLS)

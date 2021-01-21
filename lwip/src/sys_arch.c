@@ -72,7 +72,7 @@ struct sys_mbox_msg {
   void *msg;
 };
 
-#define SYS_MBOX_SIZE 128
+#define SYS_MBOX_SIZE 16
 
 struct sys_mbox {
   int first, last;
@@ -221,8 +221,8 @@ err_t sys_mbox_trypost(struct sys_mbox **mb, void *msg) {
                           (void *)msg));
 
   if ((mbox->last + 1) >= (mbox->first + SYS_MBOX_SIZE)) {
-    // sys_sem_signal(&mbox->mutex);
     sys_unlock_mbox(mbox);
+    sos_debug_printf("can't post now\n");
     return ERR_MEM;
   }
 
@@ -250,13 +250,11 @@ void sys_mbox_post(struct sys_mbox **mb, void *msg) {
 
   // this is posting (adding) msg to the mailbox
 
-  u8_t first;
   struct sys_mbox *mbox;
   LWIP_ASSERT("invalid mbox", (mb != NULL) && (*mb != NULL));
   mbox = *mb;
 
   sys_lock_mbox(mbox);
-  // sys_arch_sem_wait(&mbox->mutex, 0);
 
   LWIP_DEBUGF(SYS_DEBUG,
               ("sys_mbox_post: mbox %p msg %p\n", (void *)mbox, (void *)msg));
@@ -265,9 +263,7 @@ void sys_mbox_post(struct sys_mbox **mb, void *msg) {
     mbox->wait_send++;
 
     sys_unlock_mbox(mbox);
-    // sys_sem_signal(&mbox->mutex);
     sys_arch_sem_wait(&mbox->not_full, 0);
-    // sys_arch_sem_wait(&mbox->mutex, 0);
     sys_lock_mbox(mbox);
     mbox->wait_send--;
   }
@@ -275,14 +271,6 @@ void sys_mbox_post(struct sys_mbox **mb, void *msg) {
   mbox->msgs[mbox->last % SYS_MBOX_SIZE] = msg;
 
   if (mbox->last == mbox->first) {
-    first = 1;
-  } else {
-    first = 0;
-  }
-
-  mbox->last++;
-
-  if (first) {
     sys_sem_signal(&mbox->not_empty);
   }
 
@@ -299,11 +287,9 @@ u32_t sys_arch_mbox_tryfetch(struct sys_mbox **mb, void **msg) {
   mbox = *mb;
 
   sys_lock_mbox(mbox);
-  // sys_arch_sem_wait(&mbox->mutex, 0);
 
   if (mbox->first == mbox->last) {
     sys_unlock_mbox(mbox);
-    // sys_sem_signal(&mbox->mutex);
     return SYS_MBOX_EMPTY;
   }
 
@@ -323,7 +309,6 @@ u32_t sys_arch_mbox_tryfetch(struct sys_mbox **mb, void **msg) {
   }
 
   sys_unlock_mbox(mbox);
-  // sys_sem_signal(&mbox->mutex);
 
   return 0;
 }
@@ -341,23 +326,17 @@ u32_t sys_arch_mbox_fetch(struct sys_mbox **mb, void **msg, u32_t timeout) {
   sys_lock_mbox(mbox);
 
   while (mbox->first == mbox->last) {
-    // sys_sem_signal(&mbox->mutex);
     sys_unlock_mbox(mbox);
 
     /* We block while waiting for a mail to arrive in the mailbox. We
    must be prepared to timeout. */
-    if (timeout != 0) {
-      time_needed = sys_arch_sem_wait(&mbox->not_empty, timeout);
+    time_needed = sys_arch_sem_wait(&mbox->not_empty, timeout);
 
-      if (time_needed == SYS_ARCH_TIMEOUT) {
-        return SYS_ARCH_TIMEOUT;
-      }
-    } else {
-      sys_arch_sem_wait(&mbox->not_empty, 0);
+    if (time_needed == SYS_ARCH_TIMEOUT) {
+      return SYS_ARCH_TIMEOUT;
     }
 
     sys_lock_mbox(mbox);
-    // sys_arch_sem_wait(&mbox->mutex, 0);
   }
 
   if (msg != NULL) {
@@ -369,6 +348,7 @@ u32_t sys_arch_mbox_fetch(struct sys_mbox **mb, void **msg, u32_t timeout) {
                 ("sys_mbox_fetch: mbox %p, null msg\n", (void *)mbox));
   }
 
+  // pop the mbox from the circ buffer
   mbox->first++;
 
   if (mbox->wait_send) {
@@ -434,7 +414,6 @@ u32_t sys_arch_sem_wait(struct sys_sem **s, u32_t timeout) {
     }
   } else {
     if (sem_wait(sem->sem) < 0) {
-      sos_debug_printf("failed to block---\n");
       sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to wait semaphore %d",
                           errno);
     }

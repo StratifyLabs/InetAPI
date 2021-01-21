@@ -229,6 +229,7 @@ int Socket::interface_read(void *buf, int nbyte) const {
 #endif
                                   (buf),
                                   nbyte, static_cast<int>(message_flags())));
+
   return result;
 }
 

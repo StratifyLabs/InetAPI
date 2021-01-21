@@ -7,7 +7,7 @@
 #include "inet/Http.hpp"
 #include "inet/Url.hpp"
 
-#define SHOW_HEADERS 0
+#define SHOW_HEADERS 1
 #if defined __link
 #define AGGREGATE_TRAFFIC(msg) (m_traffic += msg)
 #else
@@ -239,8 +239,9 @@ int Http::get_chunk_size() const {
 
 var::String Http::receive_header_fields() {
   var::String result;
-  var::String line;
+  var::GeneralString line;
 
+  result.reserve(512);
   do {
     line = std::move(socket().gets('\n'));
 
