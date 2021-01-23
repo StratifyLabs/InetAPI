@@ -32,7 +32,7 @@
 #ifndef LWIP_ARCH_CC_H_
 #define LWIP_ARCH_CC_H_
 
-#include <mcu/types.h>
+#include <sdk/types.h>
 #include <sos/debug.h>
 /* Include some files for defining library routines */
 #include <string.h>

@@ -193,6 +193,8 @@ public:
   const Response &response() const { return m_response; }
   const Request &request() const { return m_request; }
 
+  using Send = fs::FileObject::Write;
+
 protected:
   var::String m_traffic;
   int m_content_length = 0;
@@ -210,8 +212,7 @@ protected:
   void add_header_field(var::StringView key, var::StringView value);
   void add_header_fields(var::StringView fields);
 
-  void send(const fs::FileObject &file,
-            const api::ProgressCallback *progress_callback = nullptr) const;
+  void send(const fs::FileObject &file, const Send &options) const;
   void receive(const fs::FileObject &file,
                const api::ProgressCallback *progress_callback = nullptr) const;
 
@@ -380,10 +381,9 @@ public:
     return *this;
   }
 
-  const HttpServer &
-  send(const fs::FileObject &file,
-       const api::ProgressCallback *progress_callback = nullptr) const {
-    Http::send(file, progress_callback);
+  const HttpServer &send(const fs::FileObject &file,
+                         const Send &options = Send()) const {
+    Http::send(file, options);
     return *this;
   }
 
@@ -398,6 +398,11 @@ public:
   receive(const fs::FileObject &file,
           const api::ProgressCallback *progress_callback = nullptr) {
     Http::receive(file, progress_callback);
+    return *this;
+  }
+
+  HttpServer &set_transfer_encoding_chunked(bool value = true) {
+    Http::set_transfer_encoding_chunked(value);
     return *this;
   }
 

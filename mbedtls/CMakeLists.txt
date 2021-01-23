@@ -18,6 +18,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls/config.h DESTINATION ${CMAK
 
 project(mbedtls CXX C)
 
+set(LWIP_VERSION "2.1.2")
+
+
 set(SOS_DEFINITIONS IS_LOCAL_BUILD=1)
 set(SOS_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR})
 
@@ -82,6 +85,14 @@ target_include_directories(${RELEASE_TARGET}
 	PRIVATE
 	${SOS_INCLUDE_DIRECTORIES}
 	)
+
+if(SOS_IS_ARM)
+target_include_directories(${RELEASE_TARGET}
+	PRIVATE
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
+	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-${LWIP_VERSION}/src/include>
+	)
+endif()
 
 if(SOS_SDK_IS_WINDOWS)
   target_link_libraries(${RELEASE_TARGET}

@@ -201,27 +201,25 @@ void Http::send(const Response &response) const {
                  (header_fields().is_empty() ? "\r\n" : ""));
 }
 
-void Http::send(const fs::FileObject &file,
-                const api::ProgressCallback *progress_callback) const {
+void Http::send(const fs::FileObject &file, const Send &options) const {
   if (is_transfer_encoding_chunked()) {
     const size_t size = file.size();
-    for (size_t i = 0; i < size; i++) {
+    size_t i = 0;
+    do {
       const size_t page_size =
-          transfer_size() > (size - i) ? size - i : transfer_size();
+          options.page_size() > (size - i) ? size - i : options.page_size();
       socket()
-          .write(var::String().format("%d\r\n", page_size))
+          .write(var::NumberString().format("%X\r\n", page_size).string_view())
           .write(file,
-                 Socket::Write().set_page_size(page_size).set_size(page_size))
+                 Send(options).set_page_size(page_size).set_size(page_size))
           .write("\r\n");
-      i += transfer_size();
+      i += page_size;
       API_RETURN_IF_ERROR();
-    }
+    } while (i < size);
     return;
   }
 
-  socket().write(file, Socket::Write()
-                           .set_page_size(transfer_size())
-                           .set_progress_callback(progress_callback));
+  socket().write(file, options);
 }
 
 void Http::send(const Request &request) const {
@@ -367,7 +365,10 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
   send(Request(method, path, http_version()));
 
   if (options.request()) {
-    send(*options.request(), options.progress_callback());
+    send(*options.request(),
+         Send()
+             .set_page_size(transfer_size())
+             .set_progress_callback(options.progress_callback()));
   }
 
   m_response = Response(socket().gets());

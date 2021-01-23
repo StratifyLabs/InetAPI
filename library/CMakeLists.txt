@@ -10,14 +10,14 @@ if(SOS_IS_ARM)
 	macro(add_lwip_include ARCH)
 		target_include_directories(InetAPI_debug_${ARCH}
 			PUBLIC
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-2.1.2/src/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-${LWIP_VERSION}/src/include>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
 			PRIVATE
 			)
 
 		target_include_directories(InetAPI_release_${ARCH}
 			PUBLIC
-			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-2.1.2/src/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-${LWIP_VERSION}/src/include>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
 			PRIVATE
 			)

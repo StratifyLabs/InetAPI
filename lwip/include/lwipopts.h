@@ -34,7 +34,6 @@
 
 #include <errno.h>
 #include <fcntl.h>
-#include <sos/debug.h>
 #include <unistd.h>
 
 /* Prevent having to link sys_arch.c (we don't test the API layers in unit

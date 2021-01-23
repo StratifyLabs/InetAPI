@@ -14,10 +14,7 @@ if(NOT DEFINED API_IS_SDK)
 	include(API)
 endif()
 
-if(SOS_IS_ARM)
-	set(SOS_ARCH v7em_f5dh)
-	set(SOS_ARCH_LIST "")
-endif()
+set(LWIP_VERSION "2.1.2" CACHE INTERNAL "Effective LWIP version")
 
 option(IS_MBEDTLS "Build mbedtls" ON)
 option(IS_LWIP "Build lwip" ON)
