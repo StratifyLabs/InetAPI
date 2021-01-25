@@ -54,7 +54,7 @@ install(DIRECTORY lwip-${LWIP_VERSION}/src/include/lwip/
 	PATTERN CMakelists.txt EXCLUDE)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION cmake/targets)
+	DESTINATION ${SOS_SDK_PATH}/cmake/targets)
 
 
 

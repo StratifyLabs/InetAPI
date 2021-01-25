@@ -132,7 +132,7 @@ target_compile_options(${DEBUG_TARGET}
 	)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION cmake/targets)
+	DESTINATION ${SOS_SDK_PATH}/cmake/targets)
 
 add_custom_target(
 	${API_NAME}_format

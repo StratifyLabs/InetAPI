@@ -7,7 +7,7 @@
 #include "inet/Http.hpp"
 #include "inet/Url.hpp"
 
-#define SHOW_HEADERS 1
+#define SHOW_HEADERS 0
 #if defined __link
 #define AGGREGATE_TRAFFIC(msg) (m_traffic += msg)
 #else
