@@ -194,6 +194,7 @@ public:
   const Request &request() const { return m_request; }
 
   using Send = fs::FileObject::Write;
+  using Receive = fs::FileObject::Write;
 
 protected:
   var::String m_traffic;
@@ -213,8 +214,7 @@ protected:
   void add_header_fields(var::StringView fields);
 
   void send(const fs::FileObject &file, const Send &options) const;
-  void receive(const fs::FileObject &file,
-               const api::ProgressCallback *progress_callback = nullptr) const;
+  void receive(const fs::FileObject &file, const Receive &options) const;
 
   var::StringView header_fields() const {
     return var::StringView(m_header_fields);
@@ -387,17 +387,15 @@ public:
     return *this;
   }
 
-  const HttpServer &
-  receive(const fs::FileObject &file,
-          const api::ProgressCallback *progress_callback = nullptr) const {
-    Http::receive(file, progress_callback);
+  const HttpServer &receive(const fs::FileObject &file,
+                            const Receive &options = Receive()) const {
+    Http::receive(file, options);
     return *this;
   }
 
-  HttpServer &
-  receive(const fs::FileObject &file,
-          const api::ProgressCallback *progress_callback = nullptr) {
-    Http::receive(file, progress_callback);
+  HttpServer &receive(const fs::FileObject &file,
+                      const Receive &options = Receive()) {
+    Http::receive(file, options);
     return *this;
   }
 

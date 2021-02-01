@@ -278,8 +278,7 @@ var::String Http::receive_header_fields() {
   return result.to_upper();
 }
 
-void Http::receive(const fs::FileObject &file,
-                   const api::ProgressCallback *progress_callback) const {
+void Http::receive(const fs::FileObject &file, const Receive &options) const {
 
   if (is_transfer_encoding_chunked()) {
     // read chunk by chunk
@@ -288,8 +287,7 @@ void Http::receive(const fs::FileObject &file,
     char newline[2];
     do {
       chunk_size = get_chunk_size();
-      file.write(socket(), fs::File::Write()
-                               .set_progress_callback(progress_callback)
+      file.write(socket(), fs::File::Write(options)
                                .set_location(bytes_received)
                                .set_page_size(chunk_size)
                                .set_size(chunk_size));
@@ -304,11 +302,7 @@ void Http::receive(const fs::FileObject &file,
 
   do {
     // write the bytes to the file
-    file.write(socket(), fs::File::Write()
-                             .set_page_size(FSAPI_LINK_DEFAULT_PAGE_SIZE)
-                             .set_size(m_content_length)
-                             .set_progress_callback(progress_callback));
-
+    file.write(socket(), fs::File::Write(options).set_size(m_content_length));
   } while (is_stream_events() && return_value() > 0);
 }
 
@@ -388,9 +382,9 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
         method == Http::Method::get ? options.progress_callback() : nullptr;
 
     if (options.response() && (is_redirected == false)) {
-      receive(*options.response(), callback);
+      receive(*options.response(), Receive().set_progress_callback(callback));
     } else {
-      receive(NullFile(), nullptr);
+      receive(NullFile(), Receive());
     }
   }
 
@@ -477,14 +471,16 @@ HttpServer &HttpServer::run(void *context,
   bool is_stop = false;
   while (is_stop == false) {
     m_request = Request(socket().gets());
-    printer::Printer().object("request", m_request);
-    if (is_error()) {
-      break;
-    }
+    if (m_request.method() != Method::null) {
+      printer::Printer().object("request", m_request);
+      if (is_error()) {
+        break;
+      }
 
-    set_header_fields(receive_header_fields());
-    // execute the method
-    is_stop = respond && (respond(this, context, m_request) == IsStop::yes);
+      set_header_fields(receive_header_fields());
+      // execute the method
+      is_stop = respond && (respond(this, context, m_request) == IsStop::yes);
+    }
   }
 
   return *this;
