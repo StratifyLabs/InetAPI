@@ -69,7 +69,13 @@ AddressInfo::AddressInfo(const Construct &options) {
   for (struct addrinfo *info = info_start; info != nullptr;
        info = info->ai_next) {
     m_list.push_back(
-        SocketAddress(info->ai_addr, info->ai_addr->sa_len, info->ai_canonname)
+				SocketAddress(info->ai_addr,
+									#if defined __win32
+											info->ai_addr->sa_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
+									#else
+											info->ai_addr->sa_len,
+									#endif
+											info->ai_canonname)
             .set_protocol(static_cast<Protocol>(info->ai_protocol))
             .set_type(static_cast<Type>(info->ai_socktype)));
   }
