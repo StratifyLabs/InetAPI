@@ -1,7 +1,6 @@
 
-cmake_link/
-cmake_arm/
+cmake*_link/
+cmake*_arm/
 *.user
 mbedtls/mbedtls/
-cmake_qt_link/
 build_*

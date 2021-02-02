@@ -12,6 +12,8 @@ if(SOS_IS_ARM)
 			PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-${LWIP_VERSION}/src/include>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls/mbedtls/include>
 			PRIVATE
 			)
 
@@ -19,6 +21,8 @@ if(SOS_IS_ARM)
 			PUBLIC
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/lwip-${LWIP_VERSION}/src/include>
 			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls/include>
+			$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls/mbedtls/include>
 			PRIVATE
 			)
 	endmacro()

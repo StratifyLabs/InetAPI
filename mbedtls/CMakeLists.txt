@@ -21,8 +21,6 @@ project(mbedtls CXX C)
 set(LWIP_VERSION "2.1.2")
 
 
-set(SOS_DEFINITIONS IS_LOCAL_BUILD=1)
-set(SOS_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR})
 
 install(DIRECTORY mbedtls/include/mbedtls DESTINATION include)
 install(FILES mbedtls_api.h mbedtls_link_config.h mbedtls_sos_config.h DESTINATION include)
@@ -52,7 +50,6 @@ else()
 endif()
 
 set(SOS_OPTION kernel)
-set(SOS_DEFINITIONS ${SOS_DEFINITIONS} -DHAVE_LWIP_SOCKETS_H)
 
 if(SOS_IS_ARM)
 	set(LIB_OPTION kernel)
@@ -74,7 +71,7 @@ target_sources(${RELEASE_TARGET}
 
 target_compile_definitions(${RELEASE_TARGET}
 	PUBLIC
-	${SOS_DEFINITIONS}
+	HAVE_LWIP_SOCKETS_H
 	PRIVATE
 	IS_LOCAL_BUILD=1
 	)
@@ -83,7 +80,7 @@ target_include_directories(${RELEASE_TARGET}
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 	PRIVATE
-	${SOS_INCLUDE_DIRECTORIES}
+	${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR}
 	)
 
 if(SOS_IS_ARM)
