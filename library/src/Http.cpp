@@ -171,17 +171,17 @@ void Http::add_header_fields(var::StringView fields) {
 var::StringView Http::get_header_field(var::StringView key) const {
 
   const size_t key_position =
-      header_fields().find(StackString64(key).to_upper());
+      header_fields().string_view().find(StackString64(key).to_upper());
   if (key_position == StringView::npos) {
     return var::StringView();
   }
 
-  const size_t value_position = header_fields().find(":", key_position);
+  const size_t value_position = header_fields().string_view().find(":", key_position);
   if (value_position == StringView::npos) {
     return var::StringView();
   }
 
-  const size_t end_position = header_fields().find("\r", value_position);
+  const size_t end_position = header_fields().string_view().find("\r", value_position);
   if (end_position == StringView::npos) {
     return var::StringView();
   }
@@ -190,7 +190,7 @@ var::StringView Http::get_header_field(var::StringView key) const {
       (header_fields().at(value_position + 1) == ' ') ? value_position + 2
                                                       : value_position + 1;
 
-  return header_fields()(
+  return header_fields().string_view()(
       StringView::GetSubstring()
           .set_position(adjusted_value_position)
           .set_length(end_position - adjusted_value_position));
@@ -225,7 +225,7 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
 void Http::send(const Request &request) const {
 #if SHOW_HEADERS
   printf("%s\n%s\n", request.to_string().cstring(),
-         header_fields().to_string().cstring());
+         header_fields().cstring());
 #endif
   socket().write(request.to_string() + "\r\n" + header_fields() + "\r\n");
 }

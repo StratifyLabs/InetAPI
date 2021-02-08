@@ -196,6 +196,10 @@ public:
   using Send = fs::FileObject::Write;
   using Receive = fs::FileObject::Write;
 
+  const var::String & header_fields() const {
+    return m_header_fields;
+  }
+
 protected:
   var::String m_traffic;
   int m_content_length = 0;
@@ -216,9 +220,6 @@ protected:
   void send(const fs::FileObject &file, const Send &options) const;
   void receive(const fs::FileObject &file, const Receive &options) const;
 
-  var::StringView header_fields() const {
-    return var::StringView(m_header_fields);
-  }
 
   void set_header_fields(var::StringView a) {
     m_header_fields = var::String(a);
