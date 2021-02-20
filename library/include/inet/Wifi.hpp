@@ -217,11 +217,15 @@ public:
   }
 
   bool is_scan_busy() const {
+    API_RETURN_VALUE_IF_ERROR(false);
+    API_ASSERT(m_context != nullptr);
     int result = api()->get_scan_count(m_context);
     return result < 0;
   }
 
   Info get_info() {
+    API_RETURN_VALUE_IF_ERROR(Info());
+    API_ASSERT(m_context != nullptr);
     wifi_info_t info;
     if (api()->get_info(m_context, &info) < 0) {
       return Info();
@@ -246,7 +250,7 @@ public:
 
 private:
   static WifiApi m_api;
-  void *m_context;
+  void *m_context = nullptr;
 
   int initialize() {
     if (api().is_valid() == false) {
