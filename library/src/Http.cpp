@@ -218,6 +218,7 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
       char small_buffer[length];
 
       ViewFile small_write(View(small_buffer, length));
+
       small_write.write(chunk_message.string_view())
           .write(file,
                  Send(options).set_page_size(page_size).set_size(page_size))
