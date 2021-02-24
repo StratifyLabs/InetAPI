@@ -176,12 +176,14 @@ var::StringView Http::get_header_field(var::StringView key) const {
     return var::StringView();
   }
 
-  const size_t value_position = header_fields().string_view().find(":", key_position);
+  const size_t value_position =
+      header_fields().string_view().find(":", key_position);
   if (value_position == StringView::npos) {
     return var::StringView();
   }
 
-  const size_t end_position = header_fields().string_view().find("\r", value_position);
+  const size_t end_position =
+      header_fields().string_view().find("\r", value_position);
   if (end_position == StringView::npos) {
     return var::StringView();
   }
@@ -208,11 +210,20 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
     do {
       const size_t page_size =
           options.page_size() > (size - i) ? size - i : options.page_size();
-      socket()
-          .write(var::NumberString().format("%X\r\n", page_size).string_view())
+
+      const auto chunk_message =
+          var::NumberString().format("%X\r\n", page_size);
+
+      const size_t length = chunk_message.length() + page_size + 2;
+      char small_buffer[length];
+
+      ViewFile small_write(View(small_buffer, length));
+      small_write.write(chunk_message.string_view())
           .write(file,
                  Send(options).set_page_size(page_size).set_size(page_size))
           .write("\r\n");
+      socket().write(small_write.seek(0));
+
       i += page_size;
       API_RETURN_IF_ERROR();
     } while (i < size);
@@ -224,8 +235,7 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
 
 void Http::send(const Request &request) const {
 #if SHOW_HEADERS
-  printf("%s\n%s\n", request.to_string().cstring(),
-         header_fields().cstring());
+  printf("%s\n%s\n", request.to_string().cstring(), header_fields().cstring());
 #endif
   socket().write(request.to_string() + "\r\n" + header_fields() + "\r\n");
 }
