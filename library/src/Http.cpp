@@ -483,7 +483,6 @@ HttpServer &HttpServer::run(void *context,
   while (is_stop == false) {
     m_request = Request(socket().gets());
     if (m_request.method() != Method::null) {
-      printer::Printer().object("request", m_request);
       if (is_error()) {
         break;
       }

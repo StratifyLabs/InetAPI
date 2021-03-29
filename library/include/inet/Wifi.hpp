@@ -29,6 +29,47 @@ public:
     x802_1x = WIFI_SECURITY_802_1X
   };
 
+  static const char *to_cstring(Security value) {
+    switch (value) {
+    case Security::invalid:
+      return "invalid";
+    case Security::open:
+      return "open";
+    case Security::wep:
+      return "wep";
+    case Security::wpa_psk:
+      return "wpa_psk";
+    case Security::x802_1x:
+      return "x802_1x";
+    }
+    return "unknown";
+  }
+
+  static Security security_from_string(const var::StringView name) {
+
+    if (name == "invalid") {
+      return Security::invalid;
+    }
+
+    if (name == "open") {
+      return Security::open;
+    }
+
+    if (name == "wep") {
+      return Security::wep;
+    }
+
+    if (name == "wpa_psk") {
+      return Security::wpa_psk;
+    }
+
+    if (name == "x802_1x") {
+      return Security::x802_1x;
+    }
+
+    return Security::invalid;
+  }
+
   enum class ScanRegion {
     north_america = WIFI_SCAN_REGION_NORTH_AMERICA,
     asia = WIFI_SCAN_REGION_ASIA
@@ -48,7 +89,12 @@ public:
       return *this;
     }
 
-    Security security() const { return static_cast<Security>(m_info.security); }
+    Security security() const { return Security(m_info.security); }
+
+    SsidInfo &set_security(Security value) {
+      m_info.security = static_cast<u8>(value);
+      return *this;
+    }
 
     API_ACCESS_MEMBER_FUNDAMENTAL(SsidInfo, u8, info, channel)
     API_ACCESS_MEMBER_FUNDAMENTAL(SsidInfo, s8, info, rssi)
@@ -72,6 +118,14 @@ public:
     explicit AuthInfo(const var::StringView passphrase) {
       m_auth = {0};
       var::View(m_auth.password).copy(var::View(passphrase));
+    }
+
+    var::GeneralString get_passphrase() const {
+      var::GeneralString result;
+      var::View(result.data(), result.capacity())
+          .fill(0)
+          .copy(var::View(m_auth.password));
+      return result;
     }
 
     const wifi_auth_info_t &auth() const { return m_auth; }

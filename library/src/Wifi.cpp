@@ -70,7 +70,8 @@ var::Vector<Wifi::SsidInfo> Wifi::scan(const ScanAttributes &attributes,
 var::Vector<Wifi::SsidInfo> Wifi::get_ssid_info_list() {
   var::Vector<SsidInfo> result;
 
-  int count = api()->get_scan_count(m_context);
+  const int count = api()->get_scan_count(m_context);
+  result.reserve(count);
   for (int i = 0; i < count; i++) {
     wifi_ssid_info_t info;
     if (api()->get_ssid_info(m_context, i, &info) < 0) {
