@@ -125,7 +125,7 @@ public:
         var::String(value).to_upper()) {}
 
     static HeaderField from_string(var::StringView string);
-    var::String to_string() const { return key() + ": " + value(); }
+    var::GeneralString to_string() const { return key() | ": " | value(); }
   };
 
   class Request {

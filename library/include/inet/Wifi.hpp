@@ -77,7 +77,7 @@ public:
 
   class SsidInfo {
   public:
-    SsidInfo() { m_info = {0}; }
+    SsidInfo() { m_info = {}; }
     explicit SsidInfo(const wifi_ssid_info_t &info) : m_info(info) {}
 
     bool is_valid() const { return m_info.ssid[0] != 0; }
@@ -111,7 +111,7 @@ public:
 
   class AuthInfo {
   public:
-    AuthInfo() { m_auth = {0}; }
+    AuthInfo() { m_auth = {}; }
 
     explicit AuthInfo(const wifi_auth_info_t &auth) : m_auth(auth) {}
 
@@ -136,7 +136,7 @@ public:
 
   class ScanAttributes {
   public:
-    ScanAttributes() { m_attributes = {0}; }
+    ScanAttributes() { m_attributes = {}; }
 
     static ScanAttributes get_default() {
       return ScanAttributes()
@@ -191,7 +191,7 @@ public:
 
   class IpInfo {
   public:
-    IpInfo() { m_info = {0}; }
+    IpInfo() { m_info = {}; }
     explicit IpInfo(const wifi_ip_info_t &info) : m_info(info) {}
 
     bool is_valid() const { return m_info.ip_address != 0; }
@@ -226,7 +226,7 @@ public:
 
   class Info {
   public:
-    Info() { m_info = {0}; }
+    Info() { m_info = {}; }
     Info(const wifi_info_t &info) { m_info = info; }
 
     bool is_valid() const { return m_info.resd0 == WIFI_API_INFO_RESD; }
@@ -260,7 +260,9 @@ public:
     return *this;
   }
 
-  var::Vector<SsidInfo>
+  using SsidInfoList = var::Vector<SsidInfo>;
+
+  SsidInfoList
   scan(const ScanAttributes &attributes = ScanAttributes::get_default(),
        const chrono::MicroTime &timeout = 20_seconds);
 
@@ -273,11 +275,12 @@ public:
   bool is_scan_busy() const {
     API_RETURN_VALUE_IF_ERROR(false);
     API_ASSERT(m_context != nullptr);
+    api::ErrorScope error_scope;
     int result = api()->get_scan_count(m_context);
     return result < 0;
   }
 
-  Info get_info() {
+  Info get_info() const {
     API_RETURN_VALUE_IF_ERROR(Info());
     API_ASSERT(m_context != nullptr);
     wifi_info_t info;
@@ -287,7 +290,7 @@ public:
     return Info(info);
   }
 
-  var::Vector<SsidInfo> get_ssid_info_list();
+  SsidInfoList get_ssid_info_list();
 
   Wifi &set_mode();
   Wifi &set_mac_address(u8 mac_address[6]);
