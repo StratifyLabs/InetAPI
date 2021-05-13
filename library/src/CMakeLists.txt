@@ -6,4 +6,5 @@ set(SOURCES
 	Socket.cpp
 	Url.cpp
 	Wifi.cpp
+	Sntp.cpp
 	PARENT_SCOPE)

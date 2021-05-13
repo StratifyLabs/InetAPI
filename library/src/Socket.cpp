@@ -55,7 +55,7 @@ AddressInfo::AddressInfo(const Construct &options) {
 
   Socket::initialize();
 
-  struct addrinfo address_info = {0};
+  struct addrinfo address_info {};
   address_info.ai_family = static_cast<int>(options.family());
   address_info.ai_protocol = static_cast<int>(options.protocol());
   address_info.ai_socktype = static_cast<int>(options.type());
@@ -68,16 +68,17 @@ AddressInfo::AddressInfo(const Construct &options) {
   API_RETURN_IF_ERROR();
   for (struct addrinfo *info = info_start; info != nullptr;
        info = info->ai_next) {
-    m_list.push_back(
-				SocketAddress(info->ai_addr,
-									#if defined __win32
-											info->ai_addr->sa_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
-									#else
-											info->ai_addr->sa_len,
-									#endif
-											info->ai_canonname)
-            .set_protocol(static_cast<Protocol>(info->ai_protocol))
-            .set_type(static_cast<Type>(info->ai_socktype)));
+    m_list.push_back(SocketAddress(info->ai_addr,
+#if defined __win32
+                                   info->ai_addr->sa_family == AF_INET
+                                       ? sizeof(struct sockaddr_in)
+                                       : sizeof(struct sockaddr_in6),
+#else
+                                   info->ai_addr->sa_len,
+#endif
+                                   info->ai_canonname)
+                         .set_protocol(static_cast<Protocol>(info->ai_protocol))
+                         .set_type(static_cast<Type>(info->ai_socktype)));
   }
 
   freeaddrinfo(info_start);
