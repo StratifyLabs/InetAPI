@@ -11,7 +11,7 @@ chrono::DateTime Sntp::get_time_of_day() const {
 
   AddressInfo address_info(inet::AddressInfo::Construct()
                                .set_family(inet::Socket::Family::inet)
-                               .set_node("time.nist.gov")
+                               .set_node("time-c.nist.gov")
                                .set_service("37")
                                .set_type(inet::Socket::Type::stream));
 
