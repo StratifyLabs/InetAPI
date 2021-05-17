@@ -16,6 +16,7 @@ namespace inet {}
 #include "inet/Http.hpp"
 #include "inet/Url.hpp"
 #include "inet/Wifi.hpp"
+#include "inet/Sntp.hpp"
 
 using namespace inet;
 

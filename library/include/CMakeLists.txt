@@ -7,5 +7,6 @@ set(SOURCES
 	inet/IpAddress.hpp
 	inet/Url.hpp
 	inet/Wifi.hpp
+	inet/Sntp.hpp
 	inet.hpp
 	PARENT_SCOPE)

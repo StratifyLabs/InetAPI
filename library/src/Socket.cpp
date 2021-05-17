@@ -55,7 +55,7 @@ AddressInfo::AddressInfo(const Construct &options) {
 
   Socket::initialize();
 
-  struct addrinfo address_info = {0};
+  struct addrinfo address_info {};
   address_info.ai_family = static_cast<int>(options.family());
   address_info.ai_protocol = static_cast<int>(options.protocol());
   address_info.ai_socktype = static_cast<int>(options.type());
