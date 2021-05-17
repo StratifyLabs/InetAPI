@@ -174,8 +174,8 @@ public:
               Http::Post().set_request(&request).set_response(&response))
             .is_success());
 
-        printer().key("request", request.data().to_string());
-        printer().key("response", response.data().to_string());
+        printer().key("request", View(request.data()).to_string<GeneralString>());
+        printer().key("response", View(response.data()).to_string<GeneralString>());
 
         TEST_ASSERT(request.data() == response.data());
       }
@@ -193,8 +193,8 @@ public:
               Http::Post().set_request(&request).set_response(&response))
             .is_success());
 
-        printer().key("request", request.data().to_string());
-        printer().key("response", response.data().to_string());
+        printer().key("request", View(request.data()).to_string<GeneralString>());
+        printer().key("response", View(response.data()).to_string<GeneralString>());
 
         TEST_ASSERT(request.data() == response.data());
       }
