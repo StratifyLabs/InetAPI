@@ -70,7 +70,7 @@ AddressInfo::AddressInfo(const Construct &options) {
        info = info->ai_next) {
     m_list.push_back(
 				SocketAddress(info->ai_addr,
-									#if defined __win32
+                                    #if defined __win32 || __linux
 											info->ai_addr->sa_family == AF_INET ? sizeof(struct sockaddr_in) : sizeof(struct sockaddr_in6),
 									#else
 											info->ai_addr->sa_len,
