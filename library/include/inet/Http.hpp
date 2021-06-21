@@ -132,7 +132,7 @@ public:
   public:
     Request() = default;
     Request(Method method, var::StringView path, var::StringView version)
-      : m_method(method), m_path(path), m_version(version) {}
+      : m_method(method), m_version(version) , m_path(path){}
 
     explicit Request(var::StringView plain_test) {
       var::StringViewList list = plain_test.split(" \r\n");
@@ -294,7 +294,7 @@ private:
   bool m_is_follow_redirects = true;
 
   virtual void renew_socket() {
-    m_socket = std::move(Socket(Socket::Family::inet, Socket::Type::stream));
+    m_socket = Socket(Socket::Family::inet, Socket::Type::stream);
   }
 };
 

@@ -81,7 +81,7 @@
 #if defined ___debug
 #define LWIP_DEBUG 1
 
-//#define ETHARP_DEBUG 0x80
+#define ETHARP_DEBUG 0x80
 //#define TCPIP_DEBUG 0x80
 //#define DNS_DEBUG 0x80
 //#define TCP_DEBUG 0x80
@@ -90,7 +90,7 @@
 //#define TRACE_DEBUG 0x80
 //#define SOCKETS_DEBUG 0x80
 //#define UDP_DEBUG 0x80
-//#define DHCP_DEBUG 0x80
+#define DHCP_DEBUG 0x80
 //#define AUTOIP_DEBUG 0x80
 //#define API_LIB_DEBUG 0x80
 //#define API_MSG_DEBUG 0x80

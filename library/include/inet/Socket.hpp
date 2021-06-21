@@ -188,7 +188,7 @@ private:
   friend class SocketAddress4;
   friend class SocketAddress6;
   friend class AddressInfo;
-  socket_address_union_t m_sockaddr = {0};
+  socket_address_union_t m_sockaddr{};
   var::String m_canon_name;
   API_AF(SocketAddress, Type, type, Type::raw);
   API_AF(SocketAddress, Protocol, protocol, Protocol::raw);

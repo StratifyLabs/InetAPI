@@ -23,12 +23,10 @@ public:
   static var::String encode(var::StringView input);
 
 private:
-  /*! \cond */
   var::String m_domain_name;
   var::String m_path;
   Protocol m_protocol;
   u16 m_port;
-  /*! \endcond */
 };
 
 } // namespace inet
