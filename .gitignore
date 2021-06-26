@@ -4,3 +4,4 @@ cmake*_arm/
 *.user
 mbedtls/mbedtls/
 build_*
+lwip/include/lwipopts.h
