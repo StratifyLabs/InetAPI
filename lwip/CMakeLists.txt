@@ -42,7 +42,6 @@ target_compile_options(${DEBUG_TARGET}
 sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
 sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
 
-
 install(DIRECTORY include/
 	DESTINATION include/${PROJECT_NAME}
 	PATTERN CMakelists.txt EXCLUDE)
@@ -53,6 +52,4 @@ install(DIRECTORY lwip-${LWIP_VERSION}/src/include/lwip/
 
 install(FILES ${PROJECT_NAME}.cmake
 	DESTINATION ${SOS_SDK_PATH}/cmake/targets)
-
-
 

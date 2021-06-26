@@ -66,7 +66,6 @@
 #define LWIP_SO_SNDTIMEO 1
 #define LWIP_SO_RCVBUF 1
 #define LWIP_MPU_COMPATIBLE 1
-#define LWIP_CHECKSUM_ON_COPY 1
 
 #define ARP_TABLE_SIZE 64
 
@@ -81,22 +80,22 @@
 #if defined ___debug
 #define LWIP_DEBUG 1
 
-#define ETHARP_DEBUG 0x80
-//#define TCPIP_DEBUG 0x80
+//#define ETHARP_DEBUG 0x80
+#define TCPIP_DEBUG 0x80
 //#define DNS_DEBUG 0x80
-//#define TCP_DEBUG 0x80
-//#define TCP_OUTPUT_DEBUG 0x80
-//#define TCP_INPUT_DEBUG 0x80
-//#define TRACE_DEBUG 0x80
-//#define SOCKETS_DEBUG 0x80
-//#define UDP_DEBUG 0x80
+#define TCP_DEBUG 0x80
+#define TCP_OUTPUT_DEBUG 0x80
+#define TCP_INPUT_DEBUG 0x80
+#define TRACE_DEBUG 0x80
+#define SOCKETS_DEBUG 0x80
+#define UDP_DEBUG 0x80
 #define DHCP_DEBUG 0x80
-//#define AUTOIP_DEBUG 0x80
-//#define API_LIB_DEBUG 0x80
-//#define API_MSG_DEBUG 0x80
-//#define NETIF_DEBUG 0x80
-//#define IP_DEBUG 0x80
-//#define TCP_CWND_DEBUG 0x80
+#define AUTOIP_DEBUG 0x80
+#define API_LIB_DEBUG 0x80
+#define API_MSG_DEBUG 0x80
+#define NETIF_DEBUG 0x80
+#define IP_DEBUG 0x80
+#define TCP_CWND_DEBUG 0x80
 //#define PBUF_DEBUG 0x80
 #define LWIP_DBG_MIN_LEVEL 0
 
@@ -106,8 +105,10 @@
 // STM32 ethernet has checksum generation built-in
 #if _LWIP_NO_CRC
 #define CHECKSUM_GEN 0
+#define LWIP_CHECKSUM_ON_COPY 0
 #else
-#define CHECKSUM_GEN 1
+#define CHECKSUM_GEN 0
+#define LWIP_CHECKSUM_ON_COPY 0
 #endif
 
 #define CHECKSUM_GEN_IP CHECKSUM_GEN
@@ -116,40 +117,25 @@
 #define CHECKSUM_GEN_ICMP CHECKSUM_GEN
 #define CHECKSUM_GEN_ICMP6 CHECKSUM_GEN
 
-#define CHECKSUM_CHECK_IP 1
-#define CHECKSUM_CHECK_UDP 1
-#define CHECKSUM_CHECK_TCP 1
-#define CHECKSUM_CHECK_ICMP 1
-#define CHECKSUM_CHECK_ICMP6 1
+#define CHECKSUM_CHECK_IP CHECKSUM_GEN
+#define CHECKSUM_CHECK_UDP CHECKSUM_GEN
+#define CHECKSUM_CHECK_TCP CHECKSUM_GEN
+#define CHECKSUM_CHECK_ICMP CHECKSUM_GEN
+#define CHECKSUM_CHECK_ICMP6 CHECKSUM_GEN
 
-#define MEM_SIZE 65536
+#define MEM_SIZE 32768
 
-#define MEMP_NUM_TCP_PCB 5
-#define MEMP_NUM_TCP_PCB_LISTEN 8
-#define MEMP_NUM_TCP_SEG 16
-#define TCP_LISTEN_BACKLOG 8
-#define TCP_TTL 255
-#define TCP_MSS (1500)
-#define TCP_MAXRTX 12
-#define TCP_SYNMAXRTX 6
+#define MEMP_NUM_TCP_PCB 4
+#define MEMP_NUM_TCP_PCB_LISTEN 4
+#define TCP_LISTEN_BACKLOG 4
+#define TCP_MSS (1460)
 
 #define LWIP_TCP_SACK_OUT 1
 #define LWIP_TCP_MAX_SACK_NUM 4
 
-#define TCP_WND (8 * TCP_MSS)
+#define TCP_WND (4 * TCP_MSS)
 #define TCP_SND_BUF TCP_WND // same as TCP_WND for max throughput
-#define TCP_SND_QUEUELEN ((4 * (TCP_SND_BUF) + (TCP_MSS - 1)) / (TCP_MSS))
-#define TCP_SNDLOWAT                                                           \
-  LWIP_MIN(LWIP_MAX(((TCP_SND_BUF) / 2), (2 * TCP_MSS) + 1), (TCP_SND_BUF)-1)
-#define TCP_SNDQUEUELOWAT LWIP_MAX(((TCP_SND_QUEUELEN) / 2), 5)
-
 #define TCP_OVERSIZE TCP_MSS
-#define TCP_QUEUE_OOSEQ 1
-#define LWIP_WND_SCALE 1
-#define TCP_RCV_SCALE 1
-#define PBUF_POOL_SIZE 16
-
-#define TCP_TMR_INTERVAL 100
 
 #define TCPIP_THREAD_STACKSIZE 2048
 
