@@ -2,8 +2,20 @@ cmake_minimum_required (VERSION 3.12)
 
 project(lwip CXX C)
 
-sos_sdk_library_target(RELEASE ${PROJECT_NAME} "${LIB_OPTION}" release ${SOS_ARCH})
 
+# Copy lwipopts_template.h if lwipopts.h is missing
+if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts.h)
+	file(READ
+		${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts_template.h
+		LWIPOPTS_TEMPLATE)
+	file(WRITE
+		${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts.h
+		${LWIPOPTS_TEMPLATE}
+		)
+endif()
+
+
+sos_sdk_library_target(RELEASE ${PROJECT_NAME} "${LIB_OPTION}" release ${SOS_ARCH})
 sos_sdk_add_subdirectory(PRIVATE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
 sos_sdk_add_subdirectory(INTERFACE_SOURCES include)
 
