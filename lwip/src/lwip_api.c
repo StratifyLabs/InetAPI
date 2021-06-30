@@ -120,8 +120,6 @@ int lwip_api_netif_set_link_down(struct netif *netif) {
 
 err_t lwip_api_netif_input(struct netif *netif) {
   const lwip_api_netif_config_t *config = netif->state;
-  struct pbuf *q;
-  struct pbuf *p;
   int len;
 
   u16 offset = 0;
@@ -142,6 +140,7 @@ err_t lwip_api_netif_input(struct netif *netif) {
 #endif
 
   /* We allocate a pbuf chain of pbufs from the pool. */
+  struct pbuf *p;
   p = pbuf_alloc_reference(config->packet_buffer, (u16_t)len, PBUF_REF);
 
   if (p != NULL) {
@@ -152,7 +151,7 @@ err_t lwip_api_netif_input(struct netif *netif) {
 
     /* We iterate over the pbuf chain until we have read the entire
      * packet into the pbuf. */
-    for (q = p; q != NULL; q = q->next) {
+    for (struct pbuf *q = p; q != NULL; q = q->next) {
       /* Read enough bytes to fill this pbuf in the chain. The
        * available data in the pbuf is given by the q->len
        * variable.
@@ -188,8 +187,8 @@ err_t lwip_api_netif_input(struct netif *netif) {
        * supports */
       if (netif->input(p, netif) != ERR_OK) {
         LWIP_DEBUGF(NETIF_DEBUG, ("netif_dev_input: IP input error\n"));
-        pbuf_free(p);
-        p = NULL;
+        // pbuf_free(p);
+        // p = NULL;
       }
     }
 
@@ -206,7 +205,6 @@ err_t lwip_api_netif_input(struct netif *netif) {
 
 err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
   const lwip_api_netif_config_t *config = netif->state;
-  struct pbuf *q;
   int result;
 
   // initiate transfer();
@@ -218,7 +216,7 @@ err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
   pbuf_header(p, -ETH_PAD_SIZE); /* drop the padding word */
 #endif
 
-  for (q = p; q != NULL; q = q->next) {
+  for (struct pbuf *q = p; q != NULL; q = q->next) {
     /* Send the data from the pbuf to the interface, one pbuf at a
      time. The size of the data in each pbuf is kept in the ->len
      variable. */
@@ -233,13 +231,21 @@ err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
     sos_debug_printf("\n");
 #endif
 
-    if ((result = sysfs_shared_write(&config->device_config, 0, q->payload,
-                                     q->len)) != q->len) {
-      sos_debug_log_error(SOS_DEBUG_SOCKET, "Failed to write (%d,%d)\n", result,
-                          errno);
-      return ERR_IF;
-    }
-    // sos_debug_log_info(SOS_DEBUG_SOCKET, "sent:%d", result);
+    int retry = 0;
+    do {
+      sos_debug_printf("write packet %d\n", q->len);
+      result =
+          sysfs_shared_write(&config->device_config, 0, q->payload, q->len);
+      if ((result != q->len) && (errno != EAGAIN)) {
+        if (errno != EAGAIN) {
+          sos_debug_printf("failed to write ethernet %d, %d\n", result, errno);
+          return ERR_IF;
+        } else {
+          sos_debug_printf("ETH is BUSY try again\n");
+          usleep(1000);
+        }
+      }
+    } while ((result != q->len) && (retry++ < 50));
   }
 
   MIB2_STATS_NETIF_ADD(netif, ifoutoctets, p->tot_len);
@@ -325,11 +331,18 @@ int lwip_api_add_netif(const lwip_api_netif_config_t *netif_config) {
 
   struct netif *netif = netif_config->lwip_netif;
 
+  ip4_addr_t gw;
+  ip4_addr_t addr;
+  ip4_addr_t netmask;
+  IP4_ADDR((&gw), 192, 168, 1, 1);
+  IP4_ADDR((&addr), 192, 168, 1, 45);
+  IP4_ADDR((&netmask), 255, 255, 255, 1);
+
   netif_add(netif,
 #if LWIP_IPV4
-            (const ip4_addr_t *)IP4_ADDR_ANY, // ip addr
-            (const ip4_addr_t *)IP4_ADDR_ANY, // ip netmask
-            (const ip4_addr_t *)IP4_ADDR_ANY, // gw
+            (const ip4_addr_t *)(IP_ADDR_ANY),    // ip addr
+            (const ip4_addr_t *)(IP_ADDR_ANY), // ip netmask
+            (const ip4_addr_t *)(IP_ADDR_ANY),      // gw
 #endif
             (void *)netif_config, lwip_api_netif_init, tcpip_input);
 
@@ -360,16 +373,7 @@ void lwip_input_thread(void *arg) {
     sos_debug_log_info(SOS_DEBUG_SOCKET, "netif %p: is up", netif);
     netif_set_link_up(netif);
     netif_set_up(netif);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    usleep(500*1000);
-    sos_debug_printf("host name is at %p\n", netif->hostname);
+    usleep(500 * 1000);
     dhcp_start(netif);
 
     while (lwip_api_netif_is_link_up(netif) > 0) {
