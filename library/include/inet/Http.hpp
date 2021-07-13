@@ -122,7 +122,7 @@ public:
     HeaderField(var::StringView key, var::StringView value)
       : var::Pair<var::String>(
         var::String(key).to_upper(),
-        var::String(value).to_upper()) {}
+        var::String(value)) {}
 
     static HeaderField from_string(var::StringView string);
     var::GeneralString to_string() const { return key() | ": " | value(); }
@@ -188,7 +188,7 @@ public:
   Http(var::StringView http_version);
   const var::String &traffic() const { return m_traffic; }
 
-  var::StringView get_header_field(var::StringView key) const;
+  var::String get_header_field(var::StringView key) const;
 
   const Response &response() const { return m_response; }
   const Request &request() const { return m_request; }

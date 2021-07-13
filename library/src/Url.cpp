@@ -8,48 +8,39 @@ using namespace inet;
 Url::Url(var::StringView url) {
 
   if (url.is_empty() == false) {
-
-    var::Tokenizer url_tokens
-      = var::Tokenizer(url, var::Tokenizer::Construct().set_delimeters("/"));
-
-    // https://domain.name:port/path
-
-    if (url_tokens.count() < 3) {
+    size_t position = 0;
+    if (url.find("https://" == 0)) {
+      m_protocol = Protocol::https;
+      position = 8;
+    } else if (url.find("http://") == 0) {
+      m_protocol = Protocol::http;
+      position = 7;
+    } else {
+      m_protocol = Protocol::null;
       return;
     }
 
-    if (var::String(url_tokens.at(0)) == "https:") {
-      m_port = 443;
-      m_protocol = Protocol::https;
-    } else if (var::String(url_tokens.at(0)) == "http:") {
-      m_port = 80;
-      m_protocol = Protocol::http;
-    }
-
-    var::Tokenizer domain_name = var::Tokenizer(
-      url_tokens.at(2),
-      var::Tokenizer::Construct().set_delimeters(":"));
-
-    if (domain_name.count() > 1) {
-      m_port = var::String(domain_name.at(1)).to_integer();
-      m_domain_name = var::String(domain_name.at(0));
+    const size_t path_position = url.find("/", position);
+    if (path_position == var::StringView::npos) {
+      m_domain_name = url.get_substring_at_position(position);
+      return;
     } else {
-      m_domain_name = var::String(url_tokens.at(2));
+      m_domain_name = url.get_substring(
+        var::StringView::GetSubstring().set_position(position).set_length(
+          path_position - position));
     }
 
-    m_path.clear();
-    for (u32 i = 3; i < url_tokens.count(); i++) {
-      m_path += var::String("/") + url_tokens.at(i);
-    }
+    m_path = url.get_substring_at_position(path_position);
+
   }
 
   return;
 }
 
 var::String Url::to_string() const {
-  return var::String("http") +
-         (m_protocol == Protocol::https ? var::String("s") : var::String()) +
-         "://" + m_domain_name + m_path;
+  return var::String("http")
+         + (m_protocol == Protocol::https ? var::String("s") : var::String())
+         + "://" + m_domain_name + m_path;
 }
 
 var::String Url::encode(var::StringView input) {

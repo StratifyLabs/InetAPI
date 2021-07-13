@@ -165,37 +165,20 @@ void Http::add_header_fields(var::StringView fields) {
     m_header_fields.clear();
     m_is_header_dirty = false;
   }
-  (m_header_fields += fields).to_upper();
+  m_header_fields += fields;
 }
 
-var::StringView Http::get_header_field(var::StringView key) const {
-
-  const size_t key_position =
-      header_fields().string_view().find(StackString64(key).to_upper());
-  if (key_position == StringView::npos) {
-    return var::StringView();
+var::String Http::get_header_field(var::StringView key) const {
+  ViewFile response(View(header_fields().string_view()));
+  var::GeneralString line;
+  while( (line = response.gets()).is_empty() ==false ) {
+    const auto header_pair = HeaderField::from_string(line);
+    if( header_pair.key() == key ){
+      return String(header_pair.value());
+    }
   }
 
-  const size_t value_position =
-      header_fields().string_view().find(":", key_position);
-  if (value_position == StringView::npos) {
-    return var::StringView();
-  }
-
-  const size_t end_position =
-      header_fields().string_view().find("\r", value_position);
-  if (end_position == StringView::npos) {
-    return var::StringView();
-  }
-
-  const size_t adjusted_value_position =
-      (header_fields().at(value_position + 1) == ' ') ? value_position + 2
-                                                      : value_position + 1;
-
-  return header_fields().string_view()(
-      StringView::GetSubstring()
-          .set_position(adjusted_value_position)
-          .set_length(end_position - adjusted_value_position));
+  return String();
 }
 
 void Http::send(const Response &response) const {
@@ -252,7 +235,7 @@ var::String Http::receive_header_fields() {
 
   result.reserve(512);
   do {
-    line = std::move(socket().gets('\n'));
+    line = socket().gets('\n');
 
     AGGREGATE_TRAFFIC(String("> ") + line);
 #if SHOW_HEADERS
@@ -277,7 +260,7 @@ var::String Http::receive_header_fields() {
       }
 
       if (attribute.key() == "TRANSFER-ENCODING" &&
-          (attribute.value() == "CHUNKED")) {
+          (var::KeyString(attribute.value()).to_lower() == "chunked")) {
         m_is_transfer_encoding_chunked = true;
       }
     }
@@ -286,7 +269,7 @@ var::String Http::receive_header_fields() {
            (socket().is_success())); // while reading the header
 
   m_is_header_dirty = true;
-  return result.to_upper();
+  return result;
 }
 
 void Http::receive(const fs::FileObject &file, const Receive &options) const {
@@ -407,11 +390,14 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
       options.response()->seek(get_file_pos, File::Whence::set);
     }
 
-    var::StringView location = get_header_field("LOCATION");
+    auto  location = get_header_field("LOCATION");
     if (location.is_empty() == false) {
 
-      if (location.find("/") != 0) {
+      if (location.string_view().find("/") != 0) {
         // connect to another server
+        Url url(location);
+        connect(url.domain_name(), url.protocol() == Url::Protocol::https ? 443 : 80);
+        location = String(url.path());
       }
 
       return execute_method(method, location, options);
@@ -466,8 +452,7 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
     }
 
     value.replace(String::Replace().set_old_string("\r"))
-        .replace(String::Replace().set_old_string("\n"))
-        .to_upper();
+        .replace(String::Replace().set_old_string("\n"));
   }
   return Http::HeaderField(var::String(key.cstring()), value);
 }
