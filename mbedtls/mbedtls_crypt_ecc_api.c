@@ -82,7 +82,7 @@ int ecc_init(void **context) {
 
   mbedtls_entropy_init(&c->entropy);
   mbedtls_ctr_drbg_init(&c->ctr_drbg);
-  mbedtls_ctr_drbg_seed(&c->ctr_drbg, mbedtls_entropy_func, &c->entropy, c, 16);
+  mbedtls_ctr_drbg_seed(&c->ctr_drbg, mbedtls_entropy_func, &c->entropy, NULL, 0);
 
   mbedtls_ecdh_init(&(c->ecdh));
   mbedtls_pk_init(&c->pk);

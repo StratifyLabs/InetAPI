@@ -10,15 +10,25 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls)
 		COMMAND git clone --branch ${MBEDTLS_BRANCH} ${MBEDTLS_GIT_REPOSITORY}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		)
-	file(REMOVE ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include/mbedtls/config.h)
-	file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls/config.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include/mbedtls)
+
 endif()
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls/config.h DESTINATION ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/include/mbedtls)
 
 project(mbedtls CXX C)
 
 set(LWIP_VERSION "2.1.2")
+
+if(NOT MBEDTLS_CONFIG_FILE)
+	message(FATAL_ERROR "MBEDTLS_CONFIG_FILE must be set")
+endif()
+
+get_filename_component(MBEDTLS_CONFIG_FILE_PATH ${MBEDTLS_CONFIG_FILE} DIRECTORY)
+
+if(NOT EXISTS ${MBEDTLS_CONFIG_FILE_PATH})
+	message(FATAL_ERROR "Could not find path to mbedtls config file ${MBEDTLS_CONFIG_FILE}")
+endif()
+
+message(STATUS "Including path to mbedtls config: ${MBEDTLS_CONFIG_FILE_PATH}")
 
 install(DIRECTORY mbedtls/include/mbedtls DESTINATION include)
 install(FILES mbedtls_api.h mbedtls_link_config.h mbedtls_sos_config.h DESTINATION include)
@@ -40,7 +50,7 @@ set(PRIVATE_SOURCELIST
 	${SOURCES}
 	${HEADERS}
 	${FORMAT_SOURCELIST}
-	config/mbedtls/config.h
+	${MBEDTLS_CONFIG_FILE}
 	timing_alt.h
 	threading.c)
 
@@ -75,6 +85,7 @@ target_compile_definitions(${RELEASE_TARGET}
 	HAVE_LWIP_SOCKETS_H
 	PRIVATE
 	IS_LOCAL_BUILD=1
+	MBEDTLS_CONFIG_FILE=\"${MBEDTLS_CONFIG_FILE}\"
 	)
 
 target_include_directories(${RELEASE_TARGET}
