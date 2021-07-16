@@ -34,7 +34,8 @@ static int ecc_dsa_create_key_pair(
   u8 *private_key,
   u32 *private_key_capacity);
 
-static int ecc_dsa_set_key_pair(void *context,
+static int ecc_dsa_set_key_pair(
+  void *context,
   const u8 *public_key,
   u32 public_key_capacity,
   const u8 *private_key,
@@ -44,13 +45,15 @@ static int ecc_dsa_sign(
   void *context,
   const u8 *message_hash,
   u32 hash_size,
-  u8 * signature, u32 * signature_length);
+  u8 *signature,
+  u32 *signature_length);
 
 static int ecc_dsa_verify(
   void *context,
   const u8 *message_hash,
   u32 hash_size,
-  const u8 *signature, u32 signature_length);
+  const u8 *signature,
+  u32 signature_length);
 
 const crypt_ecc_api_t mbedtls_crypt_ecc_api = {
   .sos_api
@@ -82,11 +85,15 @@ int ecc_init(void **context) {
 
   mbedtls_entropy_init(&c->entropy);
   mbedtls_ctr_drbg_init(&c->ctr_drbg);
-  mbedtls_ctr_drbg_seed(&c->ctr_drbg, mbedtls_entropy_func, &c->entropy, NULL, 0);
+  mbedtls_ctr_drbg_seed(
+    &c->ctr_drbg,
+    mbedtls_entropy_func,
+    &c->entropy,
+    NULL,
+    0);
 
   mbedtls_ecdh_init(&(c->ecdh));
   mbedtls_pk_init(&c->pk);
-
 
   *context = c;
   return 0;
@@ -107,6 +114,38 @@ void ecc_deinit(void **context) {
   }
 }
 
+static mbedtls_ecp_group_id get_group_id_from_type(crypt_ecc_key_pair_t type){
+  switch (type) {
+  case CRYPT_ECC_KEY_PAIR_SECP192R1:
+    return MBEDTLS_ECP_DP_SECP192R1;
+  case CRYPT_ECC_KEY_PAIR_SECP224R1:
+    return MBEDTLS_ECP_DP_SECP224R1;
+  case CRYPT_ECC_KEY_PAIR_SECP256R1:
+    return MBEDTLS_ECP_DP_SECP256R1;
+  case CRYPT_ECC_KEY_PAIR_SECP384R1:
+    return MBEDTLS_ECP_DP_SECP384R1;
+  case CRYPT_ECC_KEY_PAIR_SECP521R1:
+    return MBEDTLS_ECP_DP_SECP521R1;
+  case CRYPT_ECC_KEY_PAIR_BP256R1:
+    return MBEDTLS_ECP_DP_BP256R1;
+  case CRYPT_ECC_KEY_PAIR_BP384R1:
+    return MBEDTLS_ECP_DP_BP384R1;
+  case CRYPT_ECC_KEY_PAIR_BP512R1:
+    return MBEDTLS_ECP_DP_BP512R1;
+  case CRYPT_ECC_KEY_PAIR_CURVE25519:
+    return MBEDTLS_ECP_DP_CURVE25519;
+  case CRYPT_ECC_KEY_PAIR_SECP192K1:
+    return MBEDTLS_ECP_DP_SECP192K1;
+  case CRYPT_ECC_KEY_PAIR_SECP224K1:
+    return MBEDTLS_ECP_DP_SECP224K1;
+  case CRYPT_ECC_KEY_PAIR_SECP256K1:
+    return MBEDTLS_ECP_DP_SECP256K1;
+  case CRYPT_ECC_KEY_PAIR_CURVE448:
+    return MBEDTLS_ECP_DP_CURVE448;
+  }
+  return MBEDTLS_ECP_DP_NONE;
+}
+
 int ecc_dh_create_key_pair(
   void *context,
   crypt_ecc_key_pair_t type,
@@ -114,7 +153,13 @@ int ecc_dh_create_key_pair(
   u32 *public_key_capacity) {
   mbedtls_crypt_ecc_context_t *c = context;
 
-  mbedtls_ecdh_setup(&(c->ecdh), MBEDTLS_ECP_DP_SECP256R1);
+  const mbedtls_ecp_group_id id = get_group_id_from_type(type);
+  if( id == MBEDTLS_ECP_DP_NONE ){
+    errno = EINVAL;
+    return -1;
+  }
+
+  mbedtls_ecdh_setup(&(c->ecdh), id);
 
   size_t olen = 0;
   int result = mbedtls_ecdh_make_public(
@@ -171,11 +216,17 @@ static int ecc_dsa_create_key_pair(
   u32 *private_key_capacity) {
   mbedtls_crypt_ecc_context_t *c = context;
 
+  const mbedtls_ecp_group_id id = get_group_id_from_type(type);
+  if( id == MBEDTLS_ECP_DP_NONE ){
+    errno = EINVAL;
+    return -1;
+  }
+
   mbedtls_pk_setup(&c->pk, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY));
 
   int key_result = mbedtls_ecdsa_genkey(
     c->pk.pk_ctx,
-    MBEDTLS_ECP_DP_SECP256R1,
+    id,
     c->ctr_drbg.f_entropy,
     c->ctr_drbg.p_entropy);
   if (key_result < 0) {
@@ -245,8 +296,6 @@ static int ecc_dsa_set_key_pair(
     }
   }
 
-
-
   return 0;
 }
 
@@ -254,7 +303,8 @@ int ecc_dsa_sign(
   void *context,
   const u8 *message_hash,
   u32 hash_size,
-  u8 *signature, u32 * signature_length) {
+  u8 *signature,
+  u32 *signature_length) {
   mbedtls_crypt_ecc_context_t *c = context;
 
   size_t length = 0;
@@ -267,7 +317,7 @@ int ecc_dsa_sign(
     &length,
     c->ctr_drbg.f_entropy,
     c->ctr_drbg.p_entropy);
-  if( result < 0 ){
+  if (result < 0) {
     errno = EINVAL;
     return -1;
   }
@@ -280,7 +330,8 @@ int ecc_dsa_verify(
   void *context,
   const u8 *message_hash,
   u32 hash_size,
-  const u8 *signature, u32 signature_length) {
+  const u8 *signature,
+  u32 signature_length) {
   mbedtls_crypt_ecc_context_t *c = context;
 
   const int result = mbedtls_pk_verify(
@@ -291,7 +342,7 @@ int ecc_dsa_verify(
     signature,
     signature_length);
 
-  if( result == 0 ){
+  if (result == 0) {
     return 1;
   }
 
