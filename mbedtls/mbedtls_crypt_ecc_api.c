@@ -126,6 +126,7 @@ int ecc_dh_create_key_pair(
     c->ctr_drbg.p_entropy);
 
   if (result < 0) {
+    errno = EINVAL;
     return -1;
   }
 
@@ -154,6 +155,7 @@ int ecc_dh_calculate_shared_secret(
     c->ctr_drbg.p_entropy);
 
   if (result < 0) {
+    errno = EINVAL;
     return -1;
   }
 
@@ -177,6 +179,7 @@ static int ecc_dsa_create_key_pair(
     c->ctr_drbg.f_entropy,
     c->ctr_drbg.p_entropy);
   if (key_result < 0) {
+    errno = EINVAL;
     return -1;
   }
 
@@ -192,7 +195,8 @@ static int ecc_dsa_create_key_pair(
   } else {
     *private_key_capacity = 0;
     *public_key_capacity = 0;
-    return -1;
+    errno = EINVAL;
+    return -2;
   }
 
   int public_key_result
@@ -205,8 +209,9 @@ static int ecc_dsa_create_key_pair(
       public_key_result);
     *public_key_capacity = public_key_result;
   } else {
+    errno = EINVAL;
     *public_key_capacity = 0;
-    return -1;
+    return -3;
   }
 
   // keys are written to the end, move them to the beginning
@@ -226,15 +231,17 @@ static int ecc_dsa_set_key_pair(
     int result
       = mbedtls_pk_parse_public_key(&c->pk, public_key, public_key_size);
     if (result < 0) {
+      errno = EINVAL;
       return -1;
     }
   }
 
-  if (private_key) {
+  if (private_key && private_key_size) {
     int result
       = mbedtls_pk_parse_key(&c->pk, private_key, private_key_size, 0, 0);
     if (result < 0) {
-      return -1;
+      errno = EINVAL;
+      return -2;
     }
   }
 
@@ -261,6 +268,7 @@ int ecc_dsa_sign(
     c->ctr_drbg.f_entropy,
     c->ctr_drbg.p_entropy);
   if( result < 0 ){
+    errno = EINVAL;
     return -1;
   }
 
