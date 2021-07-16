@@ -2,6 +2,7 @@
 
 ## New Features
 
+- Added support for out-of-build mbedtls file
 - Added support for mbedtls ECC algorithms
 
 ## Bug Fixes
