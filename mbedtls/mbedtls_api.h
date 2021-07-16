@@ -45,6 +45,7 @@ extern const crypt_hash_api_t mbedtls_crypt_sha256_api;
 extern const crypt_hash_api_t mbedtls_crypt_sha512_api;
 extern const crypt_aes_api_t mbedtls_crypt_aes_api;
 extern const crypt_random_api_t mbedtls_crypt_random_api;
+extern const crypt_ecc_api_t mbedtls_crypt_ecc_api;
 
 #if defined __link
 #define MBEDTLS_API_REQUEST &mbedtls_api

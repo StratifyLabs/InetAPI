@@ -20,8 +20,6 @@ project(mbedtls CXX C)
 
 set(LWIP_VERSION "2.1.2")
 
-
-
 install(DIRECTORY mbedtls/include/mbedtls DESTINATION include)
 install(FILES mbedtls_api.h mbedtls_link_config.h mbedtls_sos_config.h DESTINATION include)
 
@@ -30,7 +28,10 @@ include(${CMAKE_CURRENT_SOURCE_DIR}/sources.cmake)
 set(FORMAT_SOURCELIST
 	mbedtls_api.h
 	mbedtls_api.c
-	mbedtls_crypt_api.c
+	mbedtls_crypt_aes_api.c
+	mbedtls_crypt_ecc_api.c
+	mbedtls_crypt_sha_api.c
+	mbedtls_crypt_random_api.c
 	)
 
 set(PRIVATE_SOURCELIST

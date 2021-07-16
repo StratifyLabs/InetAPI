@@ -2,7 +2,7 @@
 
 ## New Features
 
-- Nothing yet
+- Added support for mbedtls ECC algorithms
 
 ## Bug Fixes
 
