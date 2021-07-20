@@ -10,7 +10,6 @@ if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls)
 		COMMAND git clone --branch ${MBEDTLS_BRANCH} ${MBEDTLS_GIT_REPOSITORY}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		)
-
 endif()
 
 
@@ -64,9 +63,6 @@ set(SOS_OPTION kernel)
 
 if(SOS_IS_ARM)
 	set(LIB_OPTION kernel)
-	list(APPEND PRIVATE_SOURCELIST mbedtls_sos_config.h)
-else()
-	list(APPEND PRIVATE_SOURCELIST mbedtls_link_config.h)
 endif()
 
 sos_sdk_library_target(RELEASE mbedtls "${LIB_OPTION}" release ${SOS_ARCH})
@@ -92,7 +88,9 @@ target_include_directories(${RELEASE_TARGET}
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
 	PRIVATE
-	${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls mbedtls/include ${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}
+	${CMAKE_CURRENT_SOURCE_DIR}/config/mbedtls
+	mbedtls/include
 	)
 
 if(SOS_IS_ARM)
@@ -113,9 +111,9 @@ endif()
 sos_sdk_library_target(DEBUG mbedtls "${LIB_OPTION}" debug ${SOS_ARCH})
 add_library(${DEBUG_TARGET} STATIC)
 sos_sdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
-sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
 
 if(SOS_IS_LINK)
+	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
 	sos_sdk_library_target(COVERAGE mbedtls "${LIB_OPTION}" coverage ${SOS_ARCH})
 	add_library(${COVERAGE_TARGET} STATIC)
 	sos_sdk_copy_target(${RELEASE_TARGET} ${COVERAGE_TARGET})
@@ -126,9 +124,12 @@ if(SOS_IS_LINK)
 		)
 
 	sos_sdk_library_add_arch_targets("${COVERAGE_OPTIONS}" ${SOS_ARCH} "")
+	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
+else()
+	set(DEPENDENCIES lwip)
+	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
+	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
 endif()
-
-sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
 
 target_compile_options(${RELEASE_TARGET}
 	PUBLIC

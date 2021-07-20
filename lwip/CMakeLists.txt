@@ -3,17 +3,13 @@ cmake_minimum_required (VERSION 3.12)
 project(lwip CXX C)
 
 
-# Copy lwipopts_template.h if lwipopts.h is missing
-if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts.h)
-	file(READ
-		${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts_template.h
-		LWIPOPTS_TEMPLATE)
-	file(WRITE
-		${CMAKE_CURRENT_SOURCE_DIR}/include/lwipopts.h
-		${LWIPOPTS_TEMPLATE}
-		)
+if(NOT LWIP_STRATIFYOS_PATH)
+	message(FATAL_ERROR "LWIP_STRATIFYOS_PATH must be set")
 endif()
 
+if(NOT LWIP_CONFIG_PATH)
+	message(FATAL_ERROR "LWIP_CONFIG_PATH needs to be set to lwipopts.h directory")
+endif()
 
 sos_sdk_library_target(RELEASE ${PROJECT_NAME} "${LIB_OPTION}" release ${SOS_ARCH})
 sos_sdk_add_subdirectory(PRIVATE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -34,6 +30,8 @@ target_include_directories(${RELEASE_TARGET}
 	PUBLIC
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/lwip-${LWIP_VERSION}/src/include>
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+	$<BUILD_INTERFACE:${LWIP_STRATIFYOS_PATH}>
+	$<BUILD_INTERFACE:${LWIP_CONFIG_PATH}>
 	PRIVATE
 	)
 
@@ -51,8 +49,10 @@ target_compile_options(${DEBUG_TARGET}
 	-Os
 	)
 
-sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
-sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
+set(DEPENDENCIES StratifyOS_sys)
+
+sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
+sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
 
 install(DIRECTORY include/
 	DESTINATION include/${PROJECT_NAME}
