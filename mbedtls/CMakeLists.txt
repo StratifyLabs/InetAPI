@@ -113,7 +113,8 @@ add_library(${DEBUG_TARGET} STATIC)
 sos_sdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
 
 if(SOS_IS_LINK)
-	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
+	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "StratifyOS")
+
 	sos_sdk_library_target(COVERAGE mbedtls "${LIB_OPTION}" coverage ${SOS_ARCH})
 	add_library(${COVERAGE_TARGET} STATIC)
 	sos_sdk_copy_target(${RELEASE_TARGET} ${COVERAGE_TARGET})
@@ -123,13 +124,14 @@ if(SOS_IS_LINK)
 		--coverage
 		)
 
-	sos_sdk_library_add_arch_targets("${COVERAGE_OPTIONS}" ${SOS_ARCH} "")
-	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
+	sos_sdk_library_add_arch_targets("${COVERAGE_OPTIONS}" ${SOS_ARCH} "StratifyOS")
+	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "StratifyOS")
 else()
-	set(DEPENDENCIES lwip)
-	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
-	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
+	message("Linking to StratifyOS MCU for header inclusion")
+	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "StratifyOS_mcu")
+	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "StratifyOS_mcu")
 endif()
+
 
 target_compile_options(${RELEASE_TARGET}
 	PUBLIC
