@@ -2,6 +2,7 @@
 
 ## New Features
 
+- Add method to get SSID name as a c-string
 - Added support for out-of-build mbedtls file
 - Added support for mbedtls ECC algorithms
 

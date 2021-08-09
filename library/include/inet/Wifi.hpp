@@ -83,6 +83,7 @@ public:
     bool is_valid() const { return m_info.ssid[0] != 0; }
 
     var::StringView get_name() const { return m_info.ssid; }
+    const char * get_name_cstring() const { return m_info.ssid; }
 
     SsidInfo &set_name(const var::StringView value) {
       var::View(m_info.ssid).fill(0).pop_back().copy(var::View(value));
