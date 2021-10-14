@@ -17,7 +17,7 @@
 namespace printer {
 Printer &operator<<(Printer &printer, const inet::Http::Request &value) {
   return printer.key("method", inet::Http::to_string(value.method()))
-      .key("path", value.path());
+    .key("path", value.path());
 }
 Printer &operator<<(Printer &printer, const inet::Http::Response &value) {
   return printer.key("status", inet::Http::to_string(value.status()));
@@ -171,9 +171,9 @@ void Http::add_header_fields(var::StringView fields) {
 var::String Http::get_header_field(var::StringView key) const {
   ViewFile response(View(header_fields().string_view()));
   var::GeneralString line;
-  while( (line = response.gets()).is_empty() ==false ) {
+  while ((line = response.gets()).is_empty() == false) {
     const auto header_pair = HeaderField::from_string(line);
-    if( header_pair.key() == key ){
+    if (header_pair.key() == key) {
       return String(header_pair.value());
     }
   }
@@ -182,8 +182,9 @@ var::String Http::get_header_field(var::StringView key) const {
 }
 
 void Http::send(const Response &response) const {
-  socket().write(response.to_string() + "\r\n" + header_fields() + "\r\n" +
-                 (header_fields().is_empty() ? "\r\n" : ""));
+  socket().write(
+    response.to_string() + "\r\n" + header_fields() + "\r\n"
+    + (header_fields().is_empty() ? "\r\n" : ""));
 }
 
 void Http::send(const fs::FileObject &file, const Send &options) const {
@@ -191,11 +192,11 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
     const size_t size = file.size();
     size_t i = 0;
     do {
-      const size_t page_size =
-          options.page_size() > (size - i) ? size - i : options.page_size();
+      const size_t page_size
+        = options.page_size() > (size - i) ? size - i : options.page_size();
 
-      const auto chunk_message =
-          var::NumberString().format("%X\r\n", page_size);
+      const auto chunk_message
+        = var::NumberString().format("%X\r\n", page_size);
 
       const size_t length = chunk_message.length() + page_size + 2;
       char small_buffer[length];
@@ -203,9 +204,8 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
       ViewFile small_write(View(small_buffer, length));
 
       small_write.write(chunk_message.string_view())
-          .write(file,
-                 Send(options).set_page_size(page_size).set_size(page_size))
-          .write("\r\n");
+        .write(file, Send(options).set_page_size(page_size).set_size(page_size))
+        .write("\r\n");
       socket().write(small_write.seek(0));
 
       i += page_size;
@@ -246,8 +246,8 @@ var::String Http::receive_header_fields() {
       const Http::HeaderField attribute = HeaderField::from_string(line);
 
       if (attribute.key() == "CONTENT-LENGTH") {
-        m_content_length =
-            static_cast<unsigned int>(attribute.value().to_integer());
+        m_content_length
+          = static_cast<unsigned int>(attribute.value().to_integer());
       }
 
       if (attribute.key() == "CONTENT-TYPE") {
@@ -259,14 +259,15 @@ var::String Http::receive_header_fields() {
         }
       }
 
-      if (attribute.key() == "TRANSFER-ENCODING" &&
-          (var::KeyString(attribute.value()).to_lower() == "chunked")) {
+      if (
+        attribute.key() == "TRANSFER-ENCODING"
+        && (var::KeyString(attribute.value()).to_lower() == "chunked")) {
         m_is_transfer_encoding_chunked = true;
       }
     }
 
-  } while (line.length() > 2 &&
-           (socket().is_success())); // while reading the header
+  } while (line.length() > 2
+           && (socket().is_success())); // while reading the header
 
   m_is_header_dirty = true;
   return result;
@@ -281,10 +282,12 @@ void Http::receive(const fs::FileObject &file, const Receive &options) const {
     char newline[2];
     do {
       chunk_size = get_chunk_size();
-      file.write(socket(), fs::File::Write(options)
-                               .set_location(bytes_received)
-                               .set_page_size(chunk_size)
-                               .set_size(chunk_size));
+      file.write(
+        socket(),
+        fs::File::Write(options)
+          .set_location(bytes_received)
+          .set_page_size(chunk_size)
+          .set_size(chunk_size));
       bytes_received += chunk_size;
       // read the \r\n at the end of the data
       socket().read(View(newline));
@@ -302,13 +305,16 @@ void Http::receive(const fs::FileObject &file, const Receive &options) const {
 
 HttpClient::HttpClient(var::StringView http_version) : Http(http_version) {}
 
-HttpClient &HttpClient::execute_method(Method method, var::StringView path,
-                                       const ExecuteMethod &options) {
+HttpClient &HttpClient::execute_method(
+  Method method,
+  var::StringView path,
+  const ExecuteMethod &options) {
 
   API_RETURN_VALUE_IF_ERROR(*this);
 
-  if ((m_is_connected == false) && (m_host.is_empty() == false) &&
-      connect(m_host).is_error()) {
+  if (
+    (m_is_connected == false) && (m_host.is_empty() == false)
+    && connect(m_host).is_error()) {
     return *this;
   }
 
@@ -332,19 +338,21 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
     add_header_field("Connection", "keep-alive");
   }
 
-  if (KeyString(get_header_field("accept"))
-          .to_lower()
-          .string_view()
-          .find("text/event-stream") == 0) {
+  if (
+    KeyString(get_header_field("accept"))
+      .to_lower()
+      .string_view()
+      .find("text/event-stream")
+    == 0) {
     set_stream_events(true);
   } else {
     set_stream_events(false);
   }
 
   if (options.request()) {
-    add_header_field("Content-Length",
-                     NumberString(options.request()->size() -
-                                  options.request()->location()));
+    add_header_field(
+      "Content-Length",
+      NumberString(options.request()->size() - options.request()->location()));
   }
 
   m_content_length = 0;
@@ -353,10 +361,11 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
   send(Request(method, path, http_version()));
 
   if (options.request()) {
-    send(*options.request(),
-         Send()
-             .set_page_size(transfer_size())
-             .set_progress_callback(options.progress_callback()));
+    send(
+      *options.request(),
+      Send()
+        .set_page_size(transfer_size())
+        .set_progress_callback(options.progress_callback()));
   }
 
   m_response = Response(socket().gets());
@@ -372,8 +381,8 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
   if (m_content_length || is_transfer_encoding_chunked()) {
 
     // don't progress on reponse if request already sent data
-    const api::ProgressCallback *callback =
-        method == Http::Method::get ? options.progress_callback() : nullptr;
+    const api::ProgressCallback *callback
+      = method == Http::Method::get ? options.progress_callback() : nullptr;
 
     if (options.response() && (is_redirected == false)) {
       receive(*options.response(), Receive().set_progress_callback(callback));
@@ -390,13 +399,15 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
       options.response()->seek(get_file_pos, File::Whence::set);
     }
 
-    auto  location = get_header_field("LOCATION");
+    auto location = get_header_field("LOCATION");
     if (location.is_empty() == false) {
 
       if (location.string_view().find("/") != 0) {
         // connect to another server
         Url url(location);
-        connect(url.domain_name(), url.protocol() == Url::Protocol::https ? 443 : 80);
+        connect(
+          url.domain_name(),
+          url.protocol() == Url::Protocol::https ? 443 : 80);
         location = String(url.path());
       }
 
@@ -414,13 +425,13 @@ HttpClient &HttpClient::execute_method(Method method, var::StringView path,
 
 HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
 
-  AddressInfo address_info(AddressInfo::Construct()
-                               .set_node(domain_name)
-                               .set_service(port != 0xffff
-                                                ? StringView(NumberString(port))
-                                                : StringView(""))
-                               .set_family(Socket::Family::inet)
-                               .set_flags(AddressInfo::Flags::canon_name));
+  AddressInfo address_info(
+    AddressInfo::Construct()
+      .set_node(domain_name)
+      .set_service(
+        port != 0xffff ? StringView(NumberString(port)) : StringView(""))
+      .set_family(Socket::Family::inet)
+      .set_flags(AddressInfo::Flags::canon_name));
 
   API_RETURN_VALUE_IF_ERROR(*this);
   for (const SocketAddress &address : address_info.list()) {
@@ -435,14 +446,16 @@ HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
   }
 
   API_RETURN_VALUE_ASSIGN_ERROR(
-      *this, var::GeneralString(domain_name).cstring(), ECONNREFUSED);
+    *this,
+    var::GeneralString(domain_name).cstring(),
+    ECONNREFUSED);
 }
 
 Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
   const size_t colon_pos = string.find(":");
 
   const KeyString key = std::move(
-      KeyString(string.get_substring_with_length(colon_pos)).to_upper());
+    KeyString(string.get_substring_with_length(colon_pos)).to_upper());
 
   String value;
   if (colon_pos != String::npos) {
@@ -452,15 +465,17 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
     }
 
     value.replace(String::Replace().set_old_string("\r"))
-        .replace(String::Replace().set_old_string("\n"));
+      .replace(String::Replace().set_old_string("\n"));
   }
   return Http::HeaderField(var::String(key.cstring()), value);
 }
 
-HttpServer &HttpServer::run(void *context,
-                            IsStop (*respond)(HttpServer *server_self,
-                                              void *context,
-                                              const Http::Request &request)) {
+HttpServer &HttpServer::run(
+  void *context,
+  IsStop (*respond)(
+    HttpServer *server_self,
+    void *context,
+    const Http::Request &request)) {
 
   // read socket data
 
