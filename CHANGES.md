@@ -1,8 +1,17 @@
-# Version 1.1.0
+# Version 1.2.0
 
 ## New Features
 
 - CMake streamlining
+
+## Bug Fixes
+
+- None
+
+# Version 1.1.0
+
+## New Features
+
 - Add method to get SSID name as a c-string
 - Added support for out-of-build mbedtls file
 - Added support for mbedtls ECC algorithms
