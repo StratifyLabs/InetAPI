@@ -1,3 +1,13 @@
+# Version 1.3.0
+
+## New Features
+
+- None yet
+
+## Bug Fixes
+
+- `IpAddress4` needs to take `StringView` as an argument rather than `String`.
+
 # Version 1.2.0
 
 ## New Features
@@ -6,7 +16,7 @@
 
 ## Bug Fixes
 
-- `IpAddress4` needs to take `StringView` as an argument rather than `String`.
+- None
 
 # Version 1.1.0
 
