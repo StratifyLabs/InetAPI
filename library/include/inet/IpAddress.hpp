@@ -64,7 +64,7 @@ public:
 			((m_address >> 0) & 0xff));
   }
 
-  static IpAddress4 from_string(const var::String &value) {
+  static IpAddress4 from_string(const var::StringView value) {
     var::StringViewList list = value.split(".");
 
     if (list.count() < 4) {
@@ -115,7 +115,7 @@ public:
 		return result;
   }
 
-  static IpAddress6 from_string(const var::String &value) {
+  static IpAddress6 from_string(const var::StringView value) {
     var::StringViewList list = value.split(":");
 
     API_ASSERT(list.count() == 8);
