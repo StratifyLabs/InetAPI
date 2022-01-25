@@ -6,7 +6,7 @@
 
 ## Bug Fixes
 
-- `IpAddress4` needs to take `StringView` as an argument rather than `String`.
+- `IpAddress4`/`IpAddress6` needs to take `StringView` as an argument rather than `String`.
 
 # Version 1.1.0
 
