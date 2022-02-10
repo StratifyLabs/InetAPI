@@ -1,18 +1,21 @@
 # InetAPI
 
-InetAPI is an internet access API following the Stratify Labs [API framework](https://github.com/StratifyLabs/API).
+`InetAPI` is an internet access API following the Stratify Labs [API framework](https://github.com/StratifyLabs/API).
 
 It includes sub-projects which will build LWIP as well as pull and build mbedtls from the Github repository.
 
-## Building
+## How to Build
 
-The InetAPI is designed to be built as part of an SDK super project. Instructions for building are at the [SDK API project](https://github.com/StratifyLabs/SdkAPI).
+The `InetAPI` library is designed to be a CMake sub-project. To build, please use one of these projects:
+
+- Desktop [Command Line Interface](https://github.com/StratifyLabs/cli)
+- [Stratify OS on Nucleo-144](https://github.com/StratifyLabs/StratifyOS-Nucleo144)
 
 ## Usage
 
 ### Sockets
 
-You can use a `Socket` or a `SecureSocket`. The latter uses mbedtls for secure connections. The Socket layer is a C++ wrapper for POSIX style sockets (works on Stratify OS, Windows, macOS and Linux).
+You can use a `Socket` or a `SecureSocket`. The latter uses `mbedtls` for secure connections. The Socket layer is a C++ wrapper for POSIX style sockets (works on Stratify OS, Windows, macOS and Linux).
 
 ```c++
 #include <inet.hpp>

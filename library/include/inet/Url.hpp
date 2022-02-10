@@ -24,7 +24,7 @@ public:
 
 private:
   var::PathString m_domain_name;
-  var::PathString m_path;
+  var::GeneralString m_path;
   Protocol m_protocol;
   u16 m_port;
 };

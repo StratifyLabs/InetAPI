@@ -6,7 +6,7 @@ endif()
 
 api_add_api_library(${PROJECT_NAME} "${LIBRARIES}")
 
-if(SOS_IS_ARM AND API_IS_SDK)
+if(SOS_IS_ARM)
 	macro(add_lwip_include ARCH)
 		target_include_directories(InetAPI_debug_${ARCH}
 			PUBLIC
