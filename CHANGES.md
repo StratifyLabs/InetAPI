@@ -7,6 +7,7 @@
 ## Bug Fixes
 
 - `IpAddress4`/`IpAddress6` needs to take `StringView` as an argument rather than `String`.
+- Fixed a bug with reading the ethernet driver using LWIP
 
 # Version 1.1.0
 
