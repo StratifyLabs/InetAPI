@@ -141,7 +141,7 @@ err_t lwip_api_netif_input(struct netif *netif) {
 
   /* We allocate a pbuf chain of pbufs from the pool. */
   struct pbuf *p;
-  p = pbuf_alloc_reference(config->packet_buffer, (u16_t)len, PBUF_REF);
+  p = pbuf_alloc(PBUF_RAW, (u16_t)len, PBUF_RAM);
 
   if (p != NULL) {
 
@@ -233,7 +233,6 @@ err_t lwip_api_netif_output(struct netif *netif, struct pbuf *p) {
 
     int retry = 0;
     do {
-      sos_debug_printf("write packet %d\n", q->len);
       result =
           sysfs_shared_write(&config->device_config, 0, q->payload, q->len);
       if ((result != q->len) && (errno != EAGAIN)) {
