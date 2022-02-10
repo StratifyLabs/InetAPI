@@ -9,7 +9,7 @@ using namespace inet;
 chrono::DateTime Sntp::get_time_of_day() const {
   // connect to an SNTP server and get the time of day
 
-  AddressInfo address_info(inet::AddressInfo::Construct()
+  const AddressInfo address_info(inet::AddressInfo::Construct()
                                .set_family(inet::Socket::Family::inet)
                                .set_node("time-c.nist.gov")
                                .set_service("37")
@@ -23,10 +23,7 @@ chrono::DateTime Sntp::get_time_of_day() const {
   View packet_view(packet);
 
   for (const auto &address : address_info.list()) {
-
-    printer::Printer().object("address", address);
     Socket socket(address);
-
     api::ErrorScope error_scope;
     u32 count = 0;
     do {
@@ -47,7 +44,6 @@ chrono::DateTime Sntp::get_time_of_day() const {
   if( packet == 0 ){
     return chrono::DateTime();
   }
-
 
   packet = ntohl(packet);
   return chrono::DateTime(static_cast<time_t>(packet - m_ntp_timestamp_delta));

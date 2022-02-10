@@ -2,11 +2,12 @@
 
 ## New Features
 
-- None yet
+- Change default user-agent to InetAPI
 
 ## Bug Fixes
 
 - `IpAddress4` needs to take `StringView` as an argument rather than `String`.
+- Remove printer output from `Sntp`
 
 # Version 1.2.0
 

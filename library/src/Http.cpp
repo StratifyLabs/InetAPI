@@ -221,7 +221,8 @@ void Http::send(const Request &request) const {
 #if SHOW_HEADERS
   printf("%s\n%s\n", request.to_string().cstring(), header_fields().cstring());
 #endif
-  socket().write(request.to_string() + "\r\n" + header_fields() + "\r\n");
+  const auto request_string = request.to_string() + "\r\n" + header_fields() + "\r\n";
+  socket().write(request_string);
 }
 
 int Http::get_chunk_size() const {
@@ -331,7 +332,7 @@ HttpClient &HttpClient::execute_method(
   }
 
   if (get_header_field("user-agent").is_empty()) {
-    add_header_field("User-Agent", "StratifyAPI");
+    add_header_field("User-Agent", "InetAPI");
   }
 
   if (get_header_field("connection").is_empty()) {
@@ -424,7 +425,7 @@ HttpClient &HttpClient::execute_method(
 }
 
 HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
-
+  API_RETURN_VALUE_IF_ERROR(*this);
   AddressInfo address_info(
     AddressInfo::Construct()
       .set_node(domain_name)
