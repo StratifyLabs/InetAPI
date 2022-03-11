@@ -2,10 +2,12 @@
 
 ## New Features
 
+- Add `doxygen` file
 - Change default user-agent to InetAPI
 
 ## Bug Fixes
 
+- Replace `c++` with `cpp` in markdown codeblock docs
 - `IpAddress4` needs to take `StringView` as an argument rather than `String`.
 - Remove printer output from `Sntp`
 

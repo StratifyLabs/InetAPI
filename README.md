@@ -17,7 +17,7 @@ The `InetAPI` library is designed to be a CMake sub-project. To build, please us
 
 You can use a `Socket` or a `SecureSocket`. The latter uses `mbedtls` for secure connections. The Socket layer is a C++ wrapper for POSIX style sockets (works on Stratify OS, Windows, macOS and Linux).
 
-```c++
+```cpp
 #include <inet.hpp>
 
 //HTTP server with sockets
@@ -38,7 +38,7 @@ Socket server_listen_socket =
 
 ### HTTP Server
 
-```c++
+```cpp
 #include <inet.hpp>
 
 HttpServer(server_listen_socket.accept(accept_address))
@@ -115,7 +115,7 @@ HttpServer(server_listen_socket.accept(accept_address))
 
 ### Http Client
 
-```c++
+```cpp
 
 #include <fs.hpp>
 #include <inet.hpp>
