@@ -4,9 +4,12 @@
 
 - Add `doxygen` file
 - Change default user-agent to InetAPI
+- Remove `coverage` builds
 
 ## Bug Fixes
 
+- Rename cmake option `INET_API_IS_MBEDTLS` to `INET_API_IS_MBEDTLS`
+- Rename cmake option `IS_LWIP` to `INET_API_IS_LWIP`
 - Replace `c++` with `cpp` in markdown codeblock docs
 - `IpAddress4` needs to take `StringView` as an argument rather than `String`.
 - Remove printer output from `Sntp`
