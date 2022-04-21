@@ -5,6 +5,7 @@
 - Add `doxygen` file
 - Change default user-agent to InetAPI
 - Remove `coverage` builds
+- Allow inclusion of `Wifi.hpp` on `link` builds if Stratify OS headers are available
 
 ## Bug Fixes
 

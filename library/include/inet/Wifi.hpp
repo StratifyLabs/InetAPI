@@ -1,17 +1,16 @@
 // Copyright 2016-2021 Tyler Gilbert and Stratify Labs, Inc; see LICENSE.md
 
-#ifndef SAPI_INET_WIFI_HPP
-#define SAPI_INET_WIFI_HPP
+#ifndef INET_API_INET_WIFI_HPP
+#define INET_API_INET_WIFI_HPP
 
-#if !defined __link
-
+#if defined __StratifyOS__ || INET_API_HAS_STRATIFY_OS
 #include <sos/api/wifi_api.h>
 
-#include "api/api.hpp"
+#include <api/api.hpp>
 
-#include "chrono/ClockTimer.hpp"
-#include "chrono/DateTime.hpp"
-#include "var/String.hpp"
+#include <chrono/ClockTimer.hpp>
+#include <chrono/DateTime.hpp>
+#include <var/StackString.hpp>
 
 #include "IpAddress.hpp"
 
@@ -331,4 +330,4 @@ Printer &operator<<(Printer &printer, const inet::Wifi::IpInfo &a);
 
 #endif
 
-#endif // SAPI_INET_WIFI_HPP
+#endif // INET_API_INET_WIFI_HPP
