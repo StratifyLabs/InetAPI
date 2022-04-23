@@ -4,11 +4,7 @@
 #include "chrono.hpp"
 #include "printer/Printer.hpp"
 
-#if defined __link
-
-int wifi_no_warning = 0;
-
-#else
+#if defined __StratifyOS__ || INET_API_HAS_STRATIFY_OS
 
 namespace printer {
 
@@ -121,5 +117,15 @@ Wifi::IpInfo Wifi::connect(const SsidInfo &ssid_info, const AuthInfo &auth,
 
   return IpInfo();
 }
+
+#if defined __link
+const wifi_api_t  wifi_api = {};
+
+
+#endif
+
+#else
+
+int wifi_no_warning = 0;
 
 #endif
