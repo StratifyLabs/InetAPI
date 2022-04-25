@@ -9,6 +9,7 @@
 
 ## Bug Fixes
 
+- Add method to disable following redirects to that redirect test can pass
 - Rename cmake option `INET_API_IS_MBEDTLS` to `INET_API_IS_MBEDTLS`
 - Rename cmake option `IS_LWIP` to `INET_API_IS_LWIP`
 - Replace `c++` with `cpp` in markdown codeblock docs
