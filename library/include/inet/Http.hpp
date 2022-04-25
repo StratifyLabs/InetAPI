@@ -284,6 +284,11 @@ public:
   virtual Socket &socket() override { return m_socket; }
   virtual const Socket &socket() const override { return m_socket; }
 
+  HttpClient & set_follow_redirects(bool value = true ){
+    m_is_follow_redirects = value;
+    return *this;
+  }
+
 private:
   SocketAddress m_address;
   var::String m_host;
@@ -347,6 +352,11 @@ public:
 
   HttpSecureClient &connect(var::StringView domain_name, u16 port = 443) {
     HttpClient::connect(domain_name, port);
+    return *this;
+  }
+
+  HttpSecureClient & set_follow_redirects(bool value = true ){
+    HttpClient::set_follow_redirects(value);
     return *this;
   }
 

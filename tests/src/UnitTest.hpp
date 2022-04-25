@@ -281,9 +281,14 @@ public:
         DataFile response;
         TEST_ASSERT(
             http_client
-                .get("/redirect-to?url=httpbin.org%2Fget&status_code=200",
+            .set_follow_redirects(false)
+                .get("/redirect-to?url=httpbin.org&status_code=200",
                      Http::ExecuteMethod().set_response(&response))
                 .is_success());
+
+        const auto location = http_client.get_header_field("LOCATION");
+        TEST_EXPECT(location == "httpbin.org");
+        printer().key("location", location);
         if (response.size()) {
           printer().key("response", response.data().add_null_terminator());
         }
