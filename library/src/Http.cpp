@@ -380,7 +380,7 @@ HttpClient &HttpClient::execute_method(
 
   if (m_content_length || is_transfer_encoding_chunked()) {
 
-    // don't progress on reponse if request already sent data
+    // don't progress on response if request already sent data
     const api::ProgressCallback *callback
       = method == Http::Method::get ? options.progress_callback() : nullptr;
 
