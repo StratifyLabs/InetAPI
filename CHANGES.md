@@ -1,3 +1,9 @@
+# Version 1.2.1
+
+## Bug Fixes
+
+- Add method to disable following redirects to that redirect test can pass
+
 # Version 1.2.0
 
 ## New Features
