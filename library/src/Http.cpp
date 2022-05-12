@@ -169,9 +169,9 @@ void Http::add_header_fields(var::StringView fields) {
 }
 
 var::String Http::get_header_field(var::StringView key) const {
-  ViewFile response(View(header_fields().string_view()));
+  ViewFile header_view_file(View(header_fields().string_view()));
   var::GeneralString line;
-  while ((line = response.gets()).is_empty() == false) {
+  while ((line = header_view_file.gets()).is_empty() == false) {
     const auto header_pair = HeaderField::from_string(line);
     if (header_pair.key() == key) {
       return String(header_pair.value());
@@ -495,4 +495,9 @@ HttpServer &HttpServer::run(
   }
 
   return *this;
+}
+
+u16 inet::get_pseudorandom_server_port() {
+  u16 result = chrono::ClockTime::get_system_time().nanoseconds() / 1000;
+  return (result % (65535 - 49152)) + 49152;
 }

@@ -425,6 +425,8 @@ private:
   Socket m_socket;
 };
 
+u16 get_pseudorandom_server_port();
+
 
 } // namespace inet
 

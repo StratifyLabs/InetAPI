@@ -45,10 +45,10 @@ public:
     if (value_list.count() != 4) {
       return;
     }
-    m_address = (var::NumberString(value_list.at(0)).to_integer() << 24)
-                | (var::NumberString(value_list.at(1)).to_integer() << 16)
-                | (var::NumberString(value_list.at(2)).to_integer() << 8)
-                | (var::NumberString(value_list.at(3)).to_integer() << 0);
+    m_address = (var::NumberString(value_list.at(0)).to_integer() << 24) |
+                (var::NumberString(value_list.at(1)).to_integer() << 16) |
+                (var::NumberString(value_list.at(2)).to_integer() << 8) |
+                (var::NumberString(value_list.at(3)).to_integer() << 0);
   }
 
   IpAddress4(u8 a, u8 b, u8 c, u8 d) {
@@ -56,12 +56,9 @@ public:
   }
 
   var::NumberString to_string() const {
-		return var::NumberString().format(
-      "%d.%d.%d.%d",
-      ((m_address >> 24) & 0xff),
-      ((m_address >> 16) & 0xff),
-      ((m_address >> 8) & 0xff),
-			((m_address >> 0) & 0xff));
+    return var::NumberString().format(
+        "%d.%d.%d.%d", ((m_address >> 24) & 0xff), ((m_address >> 16) & 0xff),
+        ((m_address >> 8) & 0xff), ((m_address >> 0) & 0xff));
   }
 
   static IpAddress4 from_string(const var::StringView value) {
@@ -71,11 +68,10 @@ public:
       return IpAddress4();
     }
 
-    return IpAddress4(
-      var::NumberString(list.at(0)).to_integer(),
-      var::NumberString(list.at(1)).to_integer(),
-      var::NumberString(list.at(2)).to_integer(),
-      var::NumberString(list.at(3)).to_integer());
+    return IpAddress4(var::NumberString(list.at(0)).to_integer(),
+                      var::NumberString(list.at(1)).to_integer(),
+                      var::NumberString(list.at(2)).to_integer(),
+                      var::NumberString(list.at(3)).to_integer());
   }
 
   const in_addr_t &address() const { return m_address; }
@@ -94,8 +90,8 @@ public:
     var::View view(m_address);
     size_t i = 0;
     for (const auto &value : value_list) {
-      view.to_u16()[i++]
-        = value.to_unsigned_long(var::String::Base::hexadecimal);
+      view.to_u16()[i++] =
+          value.to_unsigned_long(var::String::Base::hexadecimal);
     }
   }
 
@@ -112,7 +108,7 @@ public:
         result.append(":");
       }
     }
-		return result;
+    return result;
   }
 
   static IpAddress6 from_string(const var::StringView value) {
@@ -121,20 +117,20 @@ public:
     API_ASSERT(list.count() == 8);
 
     return IpAddress6(var::Array<u16, 8>(std::array<u16, 8>(
-      {static_cast<u16>(
-         list.at(0).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(1).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(2).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(3).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(5).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(6).to_unsigned_long(var::String::Base::hexadecimal)),
-       static_cast<u16>(
-         list.at(7).to_unsigned_long(var::String::Base::hexadecimal))})));
+        {static_cast<u16>(
+             list.at(0).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(1).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(2).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(3).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(5).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(6).to_unsigned_long(var::String::Base::hexadecimal)),
+         static_cast<u16>(
+             list.at(7).to_unsigned_long(var::String::Base::hexadecimal))})));
   }
 
   const struct in6_addr &address() const { return m_address; }

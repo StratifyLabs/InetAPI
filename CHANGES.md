@@ -2,6 +2,7 @@
 
 ## New Features
 
+- Add `Http::get_pseudorandom_server_port()` to generate a random server port 
 - Add `doxygen` file
 - Change default user-agent to InetAPI
 - Remove `coverage` builds
