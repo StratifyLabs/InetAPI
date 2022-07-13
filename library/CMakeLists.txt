@@ -1,15 +1,15 @@
 
 set(LIBRARIES VarAPI FsAPI ChronoAPI)
-if(SOS_IS_LINK AND INET_API_IS_MBEDTLS)
+if(CMSDK_IS_LINK AND INET_API_IS_MBEDTLS)
   list(APPEND LIBRARIES mbedtls)
 endif()
-if(SOS_IS_LINK AND INET_API_HAS_STRATIFY_OS)
+if(CMSDK_IS_LINK AND INET_API_HAS_STRATIFY_OS)
   list(APPEND LIBRARIES StratifyOS)
 endif()
 
 api_add_api_library(${PROJECT_NAME} "${LIBRARIES}")
 
-if(SOS_IS_LINK AND INET_API_HAS_STRATIFY_OS)
+if(CMSDK_IS_LINK AND INET_API_HAS_STRATIFY_OS)
   macro(add_stratify_os CONFIG)
     target_compile_definitions(InetAPI_${CONFIG}_link
       PUBLIC
@@ -22,7 +22,7 @@ if(SOS_IS_LINK AND INET_API_HAS_STRATIFY_OS)
 
 endif()
 
-if(SOS_IS_ARM)
+if(CMSDK_IS_ARM)
   macro(add_lwip_include ARCH)
     target_include_directories(InetAPI_debug_${ARCH}
       PUBLIC
@@ -43,8 +43,8 @@ if(SOS_IS_ARM)
       )
   endmacro()
 
-  add_lwip_include(${SOS_ARCH})
-  foreach(ARCH ${SOS_ARCH_LIST})
+  add_lwip_include(${CMSDK_ARCH})
+  foreach(ARCH ${CMSDK_ARCH_LIST})
     add_lwip_include(${ARCH})
   endforeach()
 endif()

@@ -11,9 +11,9 @@ if(NOT LWIP_CONFIG_PATH)
 	message(FATAL_ERROR "LWIP_CONFIG_PATH needs to be set to lwipopts.h directory")
 endif()
 
-sos_sdk_library_target(RELEASE ${PROJECT_NAME} "${LIB_OPTION}" release ${SOS_ARCH})
-sos_sdk_add_subdirectory(PRIVATE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
-sos_sdk_add_subdirectory(INTERFACE_SOURCES include)
+cmsdk_library_target(RELEASE ${PROJECT_NAME} "${LIB_OPTION}" release ${CMSDK_ARCH})
+cmsdk_add_subdirectory(PRIVATE_SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/src)
+cmsdk_add_subdirectory(INTERFACE_SOURCES include)
 
 add_library(${RELEASE_TARGET} STATIC)
 
@@ -36,9 +36,9 @@ target_include_directories(${RELEASE_TARGET}
 	PRIVATE
 	)
 
-sos_sdk_library_target(DEBUG ${PROJECT_NAME} "${LIB_OPTION}" debug ${SOS_ARCH})
+cmsdk_library_target(DEBUG ${PROJECT_NAME} "${LIB_OPTION}" debug ${CMSDK_ARCH})
 add_library(${DEBUG_TARGET} STATIC)
-sos_sdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
+cmsdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
 
 target_compile_options(${RELEASE_TARGET}
 	PRIVATE
@@ -52,8 +52,8 @@ target_compile_options(${DEBUG_TARGET}
 
 set(DEPENDENCIES StratifyOS_sys)
 
-sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
-sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "${DEPENDENCIES}")
+cmsdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${CMSDK_ARCH} "${DEPENDENCIES}")
+cmsdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${CMSDK_ARCH} "${DEPENDENCIES}")
 
 install(DIRECTORY include/
 	DESTINATION include/${PROJECT_NAME}
@@ -64,5 +64,5 @@ install(DIRECTORY lwip-${LWIP_VERSION}/src/include/lwip/
 	PATTERN CMakelists.txt EXCLUDE)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION ${SOS_SDK_PATH}/cmake/targets)
+	DESTINATION ${CMSDK_PATH}/cmake/targets)
 

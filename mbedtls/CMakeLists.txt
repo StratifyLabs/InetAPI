@@ -53,7 +53,7 @@ set(PRIVATE_SOURCELIST
 	timing_alt.h
 	threading.c)
 
-if(SOS_IS_LINK)
+if(CMSDK_IS_LINK)
 	list(APPEND PRIVATE_SOURCELIST ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls/library/net_sockets.c)
 else()
 	list(APPEND PRIVATE_SOURCELIST ${CMAKE_CURRENT_SOURCE_DIR}/net_sockets.c)
@@ -61,11 +61,11 @@ endif()
 
 set(SOS_OPTION kernel)
 
-if(SOS_IS_ARM)
+if(CMSDK_IS_ARM)
 	set(LIB_OPTION kernel)
 endif()
 
-sos_sdk_library_target(RELEASE mbedtls "${LIB_OPTION}" release ${SOS_ARCH})
+cmsdk_library_target(RELEASE mbedtls "${LIB_OPTION}" release ${CMSDK_ARCH})
 
 add_library(${RELEASE_TARGET} STATIC)
 
@@ -93,7 +93,7 @@ target_include_directories(${RELEASE_TARGET}
 	mbedtls/include
 	)
 
-if(SOS_IS_ARM)
+if(CMSDK_IS_ARM)
 target_include_directories(${RELEASE_TARGET}
 	PRIVATE
 	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
@@ -101,24 +101,24 @@ target_include_directories(${RELEASE_TARGET}
 	)
 endif()
 
-if(SOS_SDK_IS_WINDOWS)
+if(CMSDK_IS_WINDOWS)
   target_link_libraries(${RELEASE_TARGET}
     INTERFACE ws2_32 wsock32 setupapi
     )
 endif()
 
 
-sos_sdk_library_target(DEBUG mbedtls "${LIB_OPTION}" debug ${SOS_ARCH})
+cmsdk_library_target(DEBUG mbedtls "${LIB_OPTION}" debug ${CMSDK_ARCH})
 add_library(${DEBUG_TARGET} STATIC)
-sos_sdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
+cmsdk_copy_target(${RELEASE_TARGET} ${DEBUG_TARGET})
 
-if(SOS_IS_LINK)
-	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "")
-	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "")
+if(CMSDK_IS_LINK)
+	cmsdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${CMSDK_ARCH} "")
+	cmsdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${CMSDK_ARCH} "")
 else()
 	message("Linking to StratifyOS MCU for header inclusion")
-	sos_sdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${SOS_ARCH} "StratifyOS_mcu")
-	sos_sdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${SOS_ARCH} "StratifyOS_mcu")
+	cmsdk_library_add_arch_targets("${DEBUG_OPTIONS}" ${CMSDK_ARCH} "StratifyOS_mcu")
+	cmsdk_library_add_arch_targets("${RELEASE_OPTIONS}" ${CMSDK_ARCH} "StratifyOS_mcu")
 endif()
 
 
@@ -133,7 +133,7 @@ target_compile_options(${DEBUG_TARGET}
 	)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION ${SOS_SDK_PATH}/cmake/targets)
+	DESTINATION ${CMSDK_PATH}/cmake/targets)
 
 add_custom_target(
 	${API_NAME}_format

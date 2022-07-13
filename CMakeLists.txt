@@ -8,7 +8,7 @@ option(INET_API_IS_MBEDTLS "Build mbedtls" ON)
 option(INET_API_IS_LWIP "Build lwip" ON)
 option(INET_API_HAS_STRATIFY_OS "Link build has access to Stratify OS header files" OFF)
 
-if(SOS_IS_ARM AND INET_API_IS_LWIP)
+if(CMSDK_IS_ARM AND INET_API_IS_LWIP)
 	add_subdirectory(lwip lwip)
 endif()
 
