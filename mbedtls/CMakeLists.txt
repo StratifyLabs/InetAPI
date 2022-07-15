@@ -1,6 +1,3 @@
-
-
-
 set(MBEDTLS_GIT_REPOSITORY "https://github.com/ARMmbed/mbedtls.git")
 set(MBEDTLS_BRANCH "mbedtls-2.28")
 
