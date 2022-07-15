@@ -402,7 +402,7 @@ int tls_parse_ticket(void *context, void *buf, int nbyte) {
 }
 
 const mbedtls_api_t mbedtls_api = {
-    .sos_api = {.name = "mbedtls", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+    .sos_api = {.name = "mbedtls", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
     .socket = tls_socket,
     .close = tls_close,
     .read = tls_read,
