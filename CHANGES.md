@@ -1,3 +1,14 @@
+# Version 1.4.0
+
+## New Features
+
+- Ported to use `CMakeSDK` version 2.0+
+- Update `mbedtls` to version 2.28
+
+## Bug Fixes
+
+- Don't build `SecureSocket` if `mbedtls` is not built
+
 # Version 1.3.0
 
 ## New Features

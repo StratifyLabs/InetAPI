@@ -1,5 +1,6 @@
 // Copyright 2016-2021 Tyler Gilbert and Stratify Labs, Inc; see LICENSE.md
 
+#if INET_API_IS_MBEDTLS
 #include "inet/SecureSocket.hpp"
 
 using namespace inet;
@@ -135,3 +136,7 @@ int SecureSocket::internal_close() const {
   }
   return result;
 }
+
+#else
+int inet_api_no_mbedtls_no_warning{};
+#endif

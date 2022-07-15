@@ -303,6 +303,8 @@ private:
   }
 };
 
+#if INET_API_IS_MBEDTLS
+
 class HttpSecureClient : public HttpClient {
 public:
   HttpSecureClient(var::StringView http_version = "HTTP/1.1")
@@ -371,6 +373,8 @@ private:
       = std::move(SecureSocket(Socket::Family::inet, Socket::Type::stream));
   }
 };
+
+#endif
 
 class HttpServer : public Http {
 public:

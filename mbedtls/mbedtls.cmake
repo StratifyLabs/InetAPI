@@ -1,6 +1,6 @@
 
 
-if(NOT DEFINED IS_SDK)
+if(NOT DEFINED API_IS_SDK)
 	include(API)
-	cmsdk_include_target(mbedtls_kernel "${STRATIFYAPI_CONFIG_LIST}")
+	cmsdk_include_target(mbedtls_kernel "${API_CONFIG_LIST}")
 endif()

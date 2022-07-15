@@ -3,6 +3,9 @@
 #ifndef SAPI_INET_SECURESOCKET_HPP_
 #define SAPI_INET_SECURESOCKET_HPP_
 
+
+#if INET_API_IS_MBEDTLS
+
 #include <mbedtls_api.h>
 
 #include <var/Data.hpp>
@@ -66,5 +69,7 @@ private:
 };
 
 } // namespace inet
+
+#endif
 
 #endif // SAPI_INET_SECURESOCKET_HPP_
