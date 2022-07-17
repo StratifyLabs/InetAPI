@@ -130,7 +130,7 @@ target_compile_options(${DEBUG_TARGET}
 	)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION ${CMSDK_PATH}/cmake/targets)
+	DESTINATION ${CMSDK_LOCAL_PATH}/cmake/targets)
 
 add_custom_target(
 	${API_NAME}_format

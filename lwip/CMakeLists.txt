@@ -64,5 +64,5 @@ install(DIRECTORY lwip-${LWIP_VERSION}/src/include/lwip/
 	PATTERN CMakelists.txt EXCLUDE)
 
 install(FILES ${PROJECT_NAME}.cmake
-	DESTINATION ${CMSDK_PATH}/cmake/targets)
+	DESTINATION ${CMSDK_LOCAL_PATH}/cmake/targets)
 
