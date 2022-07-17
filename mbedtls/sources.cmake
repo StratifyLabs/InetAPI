@@ -14,6 +14,9 @@ set(SOURCES
   ${SOURCES_PREFIX}/blowfish.c
   ${SOURCES_PREFIX}/camellia.c
   ${SOURCES_PREFIX}/ccm.c
+  ${SOURCES_PREFIX}/constant_time.c
+  ${SOURCES_PREFIX}/constant_time_internal.h
+  ${SOURCES_PREFIX}/constant_time_invasive.h
   ${SOURCES_PREFIX}/chacha20.c
   ${SOURCES_PREFIX}/chachapoly.c
   ${SOURCES_PREFIX}/cipher.c
