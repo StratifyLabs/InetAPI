@@ -4,7 +4,7 @@ set(MBEDTLS_BRANCH "mbedtls-2.28")
 if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls)
 	message(STATUS "Need to clone manually for the first call to cmake")
 	execute_process(
-		COMMAND git clone --branch ${MBEDTLS_BRANCH} ${MBEDTLS_GIT_REPOSITORY}
+		COMMAND git clone --depth 1 --branch ${MBEDTLS_BRANCH} ${MBEDTLS_GIT_REPOSITORY}
 		WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 		)
 endif()
