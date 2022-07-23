@@ -2,7 +2,7 @@
 
 
 set(MBEDTLS_GIT_REPOSITORY "https://github.com/ARMmbed/mbedtls.git")
-set(MBEDTLS_BRANCH "mbedtls-2.16")
+set(MBEDTLS_BRANCH "archive/mbedtls-2.16")
 
 if(NOT EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/mbedtls)
 	message(STATUS "Need to clone manually for the first call to cmake")
