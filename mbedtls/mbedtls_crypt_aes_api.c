@@ -63,7 +63,7 @@ static int aes_decrypt_ctr(
 
 const crypt_aes_api_t mbedtls_crypt_aes_api = {
   .sos_api
-  = {.name = "mbedtls_crypt_aes", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+  = {.name = "mbedtls_crypt_aes", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
   .init = aes_init,
   .deinit = aes_deinit,
   .set_key = aes_set_key,

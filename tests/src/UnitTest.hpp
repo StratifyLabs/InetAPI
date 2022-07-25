@@ -245,7 +245,7 @@ public:
                       .get("/", Http::ExecuteMethod().set_response(&response))
                       .is_success());
 
-#if 0
+#if 0 && INET_API_IS_MBEDTLS
       TEST_ASSERT(
         HttpSecureClient()
           .connect("ip.jsontest.com")
@@ -254,6 +254,31 @@ public:
 #endif
     }
 
+    {
+      Printer::Object po(printer(), "https://httpbin.org/redirect");
+
+      HttpClient http_client;
+      TEST_ASSERT(http_client.connect("httpbin.org").is_success());
+      {
+        DataFile response;
+        TEST_ASSERT(
+          http_client
+            .set_follow_redirects(false)
+            .get("/redirect-to?url=httpbin.org&status_code=200",
+                 Http::ExecuteMethod().set_response(&response))
+            .is_success());
+
+        const auto location = http_client.get_header_field("LOCATION");
+        TEST_EXPECT(location == "httpbin.org");
+        printer().key("location", location);
+        if (response.size()) {
+          printer().key("response", response.data().add_null_terminator());
+        }
+      }
+      return true;
+    }
+
+#if INET_API_IS_MBEDTLS
     {
       Printer::Object po(printer(), "https://httpbin.org/get");
       HttpSecureClient http_client;
@@ -270,30 +295,6 @@ public:
           printer().key("response", response.data().add_null_terminator());
         }
       }
-    }
-
-    {
-      Printer::Object po(printer(), "https://httpbin.org/redirect");
-
-      HttpClient http_client;
-      TEST_ASSERT(http_client.connect("httpbin.org").is_success());
-      {
-        DataFile response;
-        TEST_ASSERT(
-            http_client
-            .set_follow_redirects(false)
-                .get("/redirect-to?url=httpbin.org&status_code=200",
-                     Http::ExecuteMethod().set_response(&response))
-                .is_success());
-
-        const auto location = http_client.get_header_field("LOCATION");
-        TEST_EXPECT(location == "httpbin.org");
-        printer().key("location", location);
-        if (response.size()) {
-          printer().key("response", response.data().add_null_terminator());
-        }
-      }
-      return true;
     }
 
     {
@@ -317,6 +318,7 @@ public:
     }
 
     return true;
+#endif
   }
 
   bool socket_address_case() {

@@ -57,7 +57,7 @@ static int ecc_dsa_verify(
 
 const crypt_ecc_api_t mbedtls_crypt_ecc_api = {
   .sos_api
-  = {.name = "mbedtls_crypt_ecc", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+  = {.name = "mbedtls_crypt_ecc", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
   .init = ecc_init,
   .deinit = ecc_deinit,
   .dh_create_key_pair = ecc_dh_create_key_pair,

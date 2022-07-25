@@ -19,7 +19,7 @@ static int sha256_finish(void *context, unsigned char *output, u32 size);
 
 const crypt_hash_api_t mbedtls_crypt_sha256_api = {
   .sos_api
-  = {.name = "mbedtls_crypt_sha256", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+  = {.name = "mbedtls_crypt_sha256", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
   .init = sha256_init,
   .deinit = sha256_deinit,
   .start = sha256_start,
@@ -38,7 +38,7 @@ static int sha512_finish(void *context, unsigned char *output, u32 size);
 
 const crypt_hash_api_t mbedtls_crypt_sha512_api = {
   .sos_api
-  = {.name = "mbedtls_crypt_sha512", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+  = {.name = "mbedtls_crypt_sha512", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
   .init = sha512_init,
   .deinit = sha512_deinit,
   .start = sha512_start,
@@ -205,7 +205,7 @@ static int aes_decrypt_ctr(
 
 const crypt_aes_api_t mbedtls_crypt_aes_api = {
   .sos_api
-  = {.name = "mbedtls_crypt_aes", .version = 0x0001, .git_hash = SOS_GIT_HASH},
+  = {.name = "mbedtls_crypt_aes", .version = 0x0001, .git_hash = CMSDK_GIT_HASH},
   .init = aes_init,
   .deinit = aes_deinit,
   .set_key = aes_set_key,
