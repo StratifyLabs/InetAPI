@@ -38,6 +38,15 @@ if(CMSDK_IS_LINK)
     add_stratify_os(debug)
   endif()
 
+else()
+
+  add_inet_api_is_mbedtls(InetAPI_release_${CMSDK_ARCH})
+  add_inet_api_is_mbedtls(InetAPI_debug_${CMSDK_ARCH})
+  foreach(ARCH ${CMSDK_ARCH_LIST})
+    add_inet_api_is_mbedtls(InetAPI_release_${CMSDK_ARCH})
+    add_inet_api_is_mbedtls(InetAPI_debug_${CMSDK_ARCH})
+  endforeach()
+
 endif()
 
 if(CMSDK_IS_ARM)
