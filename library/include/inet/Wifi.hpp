@@ -6,11 +6,8 @@
 #if defined __StratifyOS__ || INET_API_HAS_STRATIFY_OS
 #include <sos/api/wifi_api.h>
 
-#include <api/api.hpp>
-
 #include <chrono/ClockTimer.hpp>
 #include <chrono/DateTime.hpp>
-#include <var/StackString.hpp>
 
 #include "IpAddress.hpp"
 

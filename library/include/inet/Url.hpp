@@ -3,7 +3,7 @@
 #ifndef SAPI_INET_URL_HPP_
 #define SAPI_INET_URL_HPP_
 
-#include "var/StackString.hpp"
+#include <var/StackString.hpp>
 
 namespace inet {
 
