@@ -3,14 +3,11 @@
 #ifndef SAPI_INET_HTTP_HPP_
 #define SAPI_INET_HTTP_HPP_
 
-#include "api/api.hpp"
+#include <var/Data.hpp>
 
 #include "SecureSocket.hpp"
 #include "Socket.hpp"
-#include "fs/File.hpp"
-#include "var/Array.hpp"
-#include "var/String.hpp"
-#include "var/Tokenizer.hpp"
+
 
 namespace inet {
 
