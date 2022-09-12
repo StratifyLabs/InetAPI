@@ -172,7 +172,8 @@ var::String Http::get_header_field(var::StringView key) const {
   ViewFile header_view_file(View(header_fields().string_view()));
   var::GeneralString line;
   while ((line = header_view_file.gets()).is_empty() == false) {
-    const auto header_pair = HeaderField::from_string(line);
+    auto header_pair = HeaderField::from_string(line);
+    header_pair.key().to_lower();
     if (header_pair.key() == key) {
       return String(header_pair.value());
     }
