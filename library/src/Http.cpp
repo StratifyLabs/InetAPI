@@ -25,14 +25,15 @@ Printer &operator<<(Printer &printer, const inet::Http::Response &value) {
 } // namespace printer
 
 using namespace inet;
+using namespace var;
 
 #define API_HANDLE_STATUS_CASE(c)                                              \
   case Status::c:                                                              \
     result = KeyString().format("%d %s", Status::c, MCU_STRINGIFY(c));         \
     break
 
-var::KeyString Http::to_string(Status status) {
-  var::KeyString result;
+KeyString Http::to_string(Status status) {
+  KeyString result;
   switch (status) {
     API_HANDLE_STATUS_CASE(null);
     API_HANDLE_STATUS_CASE(continue_);
@@ -109,8 +110,8 @@ var::KeyString Http::to_string(Status status) {
     result = KeyString(MCU_STRINGIFY(c)).to_upper();                           \
     break
 
-var::KeyString Http::to_string(Method method) {
-  var::KeyString result;
+KeyString Http::to_string(Method method) {
+  KeyString result;
   switch (method) {
     API_HANDLE_METHOD_CASE(null);
     API_HANDLE_METHOD_CASE(get);
@@ -127,7 +128,7 @@ var::KeyString Http::to_string(Method method) {
   return result;
 }
 
-Http::Method Http::method_from_string(var::StringView string) {
+Http::Method Http::method_from_string(StringView string) {
   const auto input = KeyString(string).to_upper();
   if (input == "GET") {
     return Method::get;
@@ -147,11 +148,11 @@ Http::Method Http::method_from_string(var::StringView string) {
   return Method::null;
 }
 
-Http::Http(var::StringView http_version) : m_http_version(http_version) {
+Http::Http(StringView http_version) : m_http_version(http_version) {
   API_ASSERT(http_version.find("HTTP/") == 0);
 }
 
-void Http::add_header_field(var::StringView key, var::StringView value) {
+void Http::add_header_field(StringView key, StringView value) {
   if (m_is_header_dirty) {
     m_header_fields.clear();
     m_is_header_dirty = false;
@@ -160,7 +161,7 @@ void Http::add_header_field(var::StringView key, var::StringView value) {
   m_header_fields += key + ": " + value + "\r\n";
 }
 
-void Http::add_header_fields(var::StringView fields) {
+void Http::add_header_fields(StringView fields) {
   if (m_is_header_dirty) {
     m_header_fields.clear();
     m_is_header_dirty = false;
@@ -168,13 +169,13 @@ void Http::add_header_fields(var::StringView fields) {
   m_header_fields += fields;
 }
 
-var::String Http::get_header_field(var::StringView key) const {
+String Http::get_header_field(StringView key) const {
   ViewFile header_view_file(View(header_fields().string_view()));
-  var::GeneralString line;
+  GeneralString line;
   while ((line = header_view_file.gets()).is_empty() == false) {
     auto header_pair = HeaderField::from_string(line);
     header_pair.key().to_lower();
-    if (header_pair.key() == key) {
+    if (header_pair.key() == String{key}.to_lower()) {
       return String(header_pair.value());
     }
   }
@@ -197,7 +198,7 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
         = options.page_size() > (size - i) ? size - i : options.page_size();
 
       const auto chunk_message
-        = var::NumberString().format("%X\r\n", page_size);
+        = NumberString().format("%X\r\n", page_size);
 
       const size_t length = chunk_message.length() + page_size + 2;
       char small_buffer[length];
@@ -231,9 +232,9 @@ int Http::get_chunk_size() const {
   return line.string_view().to_unsigned_long(StringView::Base::hexadecimal);
 }
 
-var::String Http::receive_header_fields() {
-  var::String result;
-  var::GeneralString line;
+String Http::receive_header_fields() {
+  String result;
+  GeneralString line;
 
   result.reserve(512);
   do {
@@ -263,7 +264,7 @@ var::String Http::receive_header_fields() {
 
       if (
         attribute.key() == "TRANSFER-ENCODING"
-        && (var::KeyString(attribute.value()).to_lower() == "chunked")) {
+        && (KeyString(attribute.value()).to_lower() == "chunked")) {
         m_is_transfer_encoding_chunked = true;
       }
     }
@@ -305,11 +306,11 @@ void Http::receive(const fs::FileObject &file, const Receive &options) const {
   } while (is_stream_events() && return_value() > 0);
 }
 
-HttpClient::HttpClient(var::StringView http_version) : Http(http_version) {}
+HttpClient::HttpClient(StringView http_version) : Http(http_version) {}
 
 HttpClient &HttpClient::execute_method(
   Method method,
-  var::StringView path,
+  StringView path,
   const ExecuteMethod &options) {
 
   API_RETURN_VALUE_IF_ERROR(*this);
@@ -322,8 +323,8 @@ HttpClient &HttpClient::execute_method(
 
   m_content_length = 0;
   int get_file_pos = 0;
-  if (options.response()) {
-    get_file_pos = options.response()->location();
+  if (options.response) {
+    get_file_pos = options.response->location();
   }
 
   add_header_field("Host", m_host);
@@ -351,10 +352,10 @@ HttpClient &HttpClient::execute_method(
     set_stream_events(false);
   }
 
-  if (options.request()) {
+  if (options.request) {
     add_header_field(
       "Content-Length",
-      NumberString(options.request()->size() - options.request()->location()));
+      NumberString(options.request->size() - options.request->location()));
   }
 
   m_content_length = 0;
@@ -362,12 +363,12 @@ HttpClient &HttpClient::execute_method(
 
   send(Request(method, path, http_version()));
 
-  if (options.request()) {
+  if (options.request) {
     send(
-      *options.request(),
+      *options.request,
       Send()
         .set_page_size(transfer_size())
-        .set_progress_callback(options.progress_callback()));
+        .set_progress_callback(options.progress_callback));
   }
 
   m_response = Response(socket().gets());
@@ -384,10 +385,10 @@ HttpClient &HttpClient::execute_method(
 
     // don't progress on response if request already sent data
     const api::ProgressCallback *callback
-      = method == Http::Method::get ? options.progress_callback() : nullptr;
+      = method == Http::Method::get ? options.progress_callback : nullptr;
 
-    if (options.response() && (is_redirected == false)) {
-      receive(*options.response(), Receive().set_progress_callback(callback));
+    if (options.response && (is_redirected == false)) {
+      receive(*options.response, Receive().set_progress_callback(callback));
     } else {
       receive(NullFile(), Receive());
     }
@@ -397,11 +398,11 @@ HttpClient &HttpClient::execute_method(
 
   if (is_redirected) {
 
-    if (options.response()) {
-      options.response()->seek(get_file_pos, File::Whence::set);
+    if (options.response) {
+      options.response->seek(get_file_pos, File::Whence::set);
     }
 
-    auto location = get_header_field("LOCATION");
+    auto location = get_header_field("location");
     if (location.is_empty() == false) {
 
       if (location.string_view().find("/") != 0) {
@@ -425,7 +426,7 @@ HttpClient &HttpClient::execute_method(
   return *this;
 }
 
-HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
+HttpClient &HttpClient::connect(StringView domain_name, u16 port) {
   API_RETURN_VALUE_IF_ERROR(*this);
   AddressInfo address_info(
     AddressInfo::Construct()
@@ -449,11 +450,11 @@ HttpClient &HttpClient::connect(var::StringView domain_name, u16 port) {
 
   API_RETURN_VALUE_ASSIGN_ERROR(
     *this,
-    var::GeneralString(domain_name).cstring(),
+    GeneralString(domain_name).cstring(),
     ECONNREFUSED);
 }
 
-Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
+Http::HeaderField Http::HeaderField::from_string(StringView string) {
   const size_t colon_pos = string.find(":");
 
   const KeyString key = std::move(
@@ -469,7 +470,7 @@ Http::HeaderField Http::HeaderField::from_string(var::StringView string) {
     value.replace(String::Replace().set_old_string("\r"))
       .replace(String::Replace().set_old_string("\n"));
   }
-  return Http::HeaderField(var::String(key.cstring()), value);
+  return Http::HeaderField(String(key.cstring()), value);
 }
 
 HttpServer &HttpServer::run(

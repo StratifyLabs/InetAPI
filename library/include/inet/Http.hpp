@@ -8,7 +8,6 @@
 #include "SecureSocket.hpp"
 #include "Socket.hpp"
 
-
 namespace inet {
 
 class Http : public api::ExecutionContext {
@@ -93,14 +92,14 @@ public:
     trace
   };
 
-  class ExecuteMethod {
-    API_AF(ExecuteMethod, const fs::FileObject *, response, nullptr);
-    API_AF(ExecuteMethod, const fs::FileObject *, request, nullptr);
-    API_AF(
+  struct ExecuteMethod {
+    API_PMAZ(
+      progress_callback,
       ExecuteMethod,
       const api::ProgressCallback *,
-      progress_callback,
       nullptr);
+    API_PMAZ(request, ExecuteMethod, const fs::FileObject *, nullptr);
+    API_PMAZ(response, ExecuteMethod, const fs::FileObject *, nullptr);
   };
 
   using Get = ExecuteMethod;
@@ -108,6 +107,54 @@ public:
   using Patch = ExecuteMethod;
   using Post = ExecuteMethod;
   using Remove = ExecuteMethod;
+
+  template <typename FileObjectType> struct MethodResponse {
+    FileObjectType file;
+    explicit MethodResponse(
+      const api::ProgressCallback *progress_callback = nullptr)
+      : m_execute_method{
+        .progress_callback = progress_callback,
+        .request = nullptr,
+        .response = &file} {}
+    const ExecuteMethod &get_execute_method() const { return m_execute_method; }
+
+  private:
+    ExecuteMethod m_execute_method{};
+  };
+
+  template <typename FileObjectType> struct MethodRequest {
+    FileObjectType file;
+    explicit MethodRequest(
+      FileObjectType request_value,
+      const api::ProgressCallback *progress_callback = nullptr)
+      : file{std::move(request_value)}, m_execute_method{
+                                          .progress_callback
+                                          = progress_callback,
+                                          .request = &file,
+                                          .response = nullptr} {}
+    const ExecuteMethod &get_execute_method() const { return m_execute_method; }
+
+  private:
+    ExecuteMethod m_execute_method{};
+  };
+
+  template <typename FileObjectType> struct MethodExchange {
+    FileObjectType request;
+    FileObjectType response;
+
+    explicit MethodExchange(
+      FileObjectType request_value,
+      const api::ProgressCallback *progress_callback = nullptr)
+      : request{std::move(request_value)}, m_execute_method{
+                                             .progress_callback
+                                             = progress_callback,
+                                             .request = &request,
+                                             .response = &response} {}
+    const ExecuteMethod &get_execute_method() const { return m_execute_method; }
+
+  private:
+    ExecuteMethod m_execute_method{.request = &request, .response = &response};
+  };
 
   static var::KeyString to_string(Status status);
   static var::KeyString to_string(Method method);
@@ -129,7 +176,7 @@ public:
   public:
     Request() = default;
     Request(Method method, var::StringView path, var::StringView version)
-      : m_method(method), m_version(version) , m_path(path){}
+      : m_method(method), m_version(version), m_path(path) {}
 
     explicit Request(var::StringView plain_test) {
       var::StringViewList list = plain_test.split(" \r\n");
@@ -142,9 +189,8 @@ public:
     }
 
     var::String to_string() const {
-			return
-        var::String(Http::to_string(m_method).cstring()) + " " + m_path + " "
-				+ m_version.cstring();
+      return var::String(Http::to_string(m_method).cstring()) + " " + m_path
+             + " " + m_version.cstring();
     }
 
   private:
@@ -193,9 +239,7 @@ public:
   using Send = fs::FileObject::Write;
   using Receive = fs::FileObject::Write;
 
-  const var::String & header_fields() const {
-    return m_header_fields;
-  }
+  const var::String &header_fields() const { return m_header_fields; }
 
 protected:
   var::String m_traffic;
@@ -216,7 +260,6 @@ protected:
 
   void send(const fs::FileObject &file, const Send &options) const;
   void receive(const fs::FileObject &file, const Receive &options) const;
-
 
   void set_header_fields(var::StringView a) {
     m_header_fields = var::String(a);
@@ -242,15 +285,51 @@ public:
     return execute_method(Method::get, path, options);
   }
 
+  template <typename FileObjectType>
+  HttpClient &
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) {
+    return execute_method(Method::get, path, response.get_execute_method());
+  }
+
   HttpClient &post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
+  template <typename FileObjectType>
+  HttpClient &
+  post(var::StringView path, const MethodExchange<FileObjectType> &request) {
+    return execute_method(Method::post, path, request.get_execute_method());
+  }
+
   HttpClient &put(var::StringView path, const Put &options) {
     return execute_method(Method::put, path, options);
   }
 
+  template <typename FileObjectType>
+  HttpClient &
+  put(var::StringView path, const MethodRequest<FileObjectType> &request) {
+    return execute_method(Method::put, path, request.get_execute_method());
+  }
+
+  template <typename FileObjectType>
+  HttpClient &
+  put(var::StringView path, const MethodExchange<FileObjectType> &request) {
+    return execute_method(Method::put, path, request.get_execute_method());
+  }
+
   HttpClient &patch(var::StringView path, const Patch &options) {
     return execute_method(Method::patch, path, options);
+  }
+
+  template <typename FileObjectType>
+  HttpClient &
+  patch(var::StringView path, const MethodExchange<FileObjectType> &request) {
+    return execute_method(Method::patch, path, request.get_execute_method());
+  }
+
+  template <typename FileObjectType>
+  HttpClient &
+  patch(var::StringView path, const MethodRequest<FileObjectType> &request) {
+    return execute_method(Method::patch, path, request.get_execute_method());
   }
 
   // http delete
@@ -281,7 +360,7 @@ public:
   virtual Socket &socket() override { return m_socket; }
   virtual const Socket &socket() const override { return m_socket; }
 
-  HttpClient & set_follow_redirects(bool value = true ){
+  HttpClient &set_follow_redirects(bool value = true) {
     m_is_follow_redirects = value;
     return *this;
   }
@@ -354,7 +433,7 @@ public:
     return *this;
   }
 
-  HttpSecureClient & set_follow_redirects(bool value = true ){
+  HttpSecureClient &set_follow_redirects(bool value = true) {
     HttpClient::set_follow_redirects(value);
     return *this;
   }
@@ -379,9 +458,12 @@ public:
   HttpServer(Socket &&socket, var::StringView http_version = "HTTP/1.1")
     : Http(http_version), m_socket(std::move(socket)) {}
 
-  HttpServer &run(void *context,
-                  IsStop (*respond)(HttpServer *server_self, void *context,
-                                    const Http::Request &request));
+  HttpServer &run(
+    void *context,
+    IsStop (*respond)(
+      HttpServer *server_self,
+      void *context,
+      const Http::Request &request));
 
   HttpServer &add_header_field(var::StringView key, var::StringView value) {
     Http::add_header_field(key, value);
@@ -393,20 +475,21 @@ public:
     return *this;
   }
 
-  const HttpServer &send(const fs::FileObject &file,
-                         const Send &options = Send()) const {
+  const HttpServer &
+  send(const fs::FileObject &file, const Send &options = Send()) const {
     Http::send(file, options);
     return *this;
   }
 
-  const HttpServer &receive(const fs::FileObject &file,
-                            const Receive &options = Receive()) const {
+  const HttpServer &receive(
+    const fs::FileObject &file,
+    const Receive &options = Receive()) const {
     Http::receive(file, options);
     return *this;
   }
 
-  HttpServer &receive(const fs::FileObject &file,
-                      const Receive &options = Receive()) {
+  HttpServer &
+  receive(const fs::FileObject &file, const Receive &options = Receive()) {
     Http::receive(file, options);
     return *this;
   }
@@ -427,7 +510,6 @@ private:
 };
 
 u16 get_pseudorandom_server_port();
-
 
 } // namespace inet
 

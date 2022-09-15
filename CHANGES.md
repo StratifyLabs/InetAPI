@@ -1,3 +1,9 @@
+# Version 1.5.0
+
+## New Features
+
+- Update `HttpClient` APIs to combine data and method requests in one object
+
 # Version 1.4.0
 
 ## New Features
