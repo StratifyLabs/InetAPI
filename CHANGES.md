@@ -4,6 +4,10 @@
 
 - Update `HttpClient` APIs to combine data and method requests in one object
 
+## Bug Fixes
+
+- Minor fixes and improvements via clang-tidy
+
 # Version 1.4.0
 
 ## New Features
