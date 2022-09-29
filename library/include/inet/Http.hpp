@@ -73,7 +73,7 @@ public:
     service_unavailable = 503,
     gateway_timeout = 504,
     http_version_not_supported = 505,
-    variant_also_negociates = 506,
+    variant_also_negotiates = 506,
     insufficient_storage = 507,
     loop_detected = 508,
     not_extended = 510,
@@ -162,14 +162,16 @@ public:
 
   class HeaderField : public var::Pair<var::String> {
   public:
-    HeaderField() {}
+    HeaderField() = default;
     HeaderField(var::StringView key, var::StringView value)
       : var::Pair<var::String>(
         var::String(key).to_upper(),
         var::String(value)) {}
 
     static HeaderField from_string(var::StringView string);
-    var::GeneralString to_string() const { return key() | ": " | value(); }
+    API_NO_DISCARD var::GeneralString to_string() const {
+      return key() | ": " | value();
+    }
   };
 
   class Request {
@@ -188,7 +190,7 @@ public:
       m_version = list.at(2);
     }
 
-    var::String to_string() const {
+    API_NO_DISCARD var::String to_string() const {
       return var::String(Http::to_string(m_method).cstring()) + " " + m_path
              + " " + m_version.cstring();
     }
@@ -215,31 +217,33 @@ public:
         = static_cast<Status>(var::NumberString(list.at(1)).to_integer());
     }
 
-    var::GeneralString to_string() const {
+    API_NO_DISCARD var::GeneralString to_string() const {
       return var::GeneralString(m_version.cstring())
         .append(" ")
         .append(Http::to_string(m_status).cstring());
     }
 
-    bool is_redirect() const { return (static_cast<int>(status()) / 100) == 3; }
+    API_NO_DISCARD bool is_redirect() const {
+      return (static_cast<int>(status()) / 100) == 3;
+    }
 
   private:
     API_RAF(Response, Status, status, Status::null);
     API_RAC(Response, var::KeyString, version);
   };
 
-  Http(var::StringView http_version);
-  const var::String &traffic() const { return m_traffic; }
-
-  var::String get_header_field(var::StringView key) const;
-
-  const Response &response() const { return m_response; }
-  const Request &request() const { return m_request; }
+  explicit Http(var::StringView http_version);
+  API_NO_DISCARD const var::String &traffic() const { return m_traffic; }
+  API_NO_DISCARD var::String get_header_field(var::StringView key) const;
+  API_NO_DISCARD const Response &response() const { return m_response; }
+  API_NO_DISCARD const Request &request() const { return m_request; }
 
   using Send = fs::FileObject::Write;
   using Receive = fs::FileObject::Write;
 
-  const var::String &header_fields() const { return m_header_fields; }
+  API_NO_DISCARD const var::String &header_fields() const {
+    return m_header_fields;
+  }
 
 protected:
   var::String m_traffic;
@@ -273,8 +277,7 @@ private:
 
   API_AF(Http, size_t, transfer_size, 1024);
 
-  int get_chunk_size() const;
-  void send_chunk(var::View chunk) const;
+  API_NO_DISCARD int get_chunk_size() const;
 };
 
 class HttpClient : public Http {
@@ -383,7 +386,7 @@ private:
 
 class HttpSecureClient : public HttpClient {
 public:
-  HttpSecureClient(var::StringView http_version = "HTTP/1.1")
+  explicit HttpSecureClient(var::StringView http_version = "HTTP/1.1")
     : HttpClient(http_version) {}
 
   HttpSecureClient &get(var::StringView path, const Get &options) {
@@ -444,7 +447,7 @@ public:
 private:
   SecureSocket m_socket;
 
-  void renew_socket() override final {
+  void renew_socket() final {
     m_socket
       = std::move(SecureSocket(Socket::Family::inet, Socket::Type::stream));
   }
@@ -458,12 +461,16 @@ public:
   HttpServer(Socket &&socket, var::StringView http_version = "HTTP/1.1")
     : Http(http_version), m_socket(std::move(socket)) {}
 
+  using Respond = api::Function<IsStop(HttpServer *, const Http::Request &)>;
+
   HttpServer &run(
     void *context,
     IsStop (*respond)(
       HttpServer *server_self,
       void *context,
       const Http::Request &request));
+
+  HttpServer &run(const Respond &respond);
 
   HttpServer &add_header_field(var::StringView key, var::StringView value) {
     Http::add_header_field(key, value);
@@ -499,8 +506,8 @@ public:
     return *this;
   }
 
-  virtual Socket &socket() override { return m_socket; }
-  virtual const Socket &socket() const override { return m_socket; }
+  Socket &socket() override { return m_socket; }
+  const Socket &socket() const override { return m_socket; }
 
 protected:
 private:

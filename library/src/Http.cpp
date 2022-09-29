@@ -93,7 +93,7 @@ KeyString Http::to_string(Status status) {
     API_HANDLE_STATUS_CASE(service_unavailable);
     API_HANDLE_STATUS_CASE(gateway_timeout);
     API_HANDLE_STATUS_CASE(http_version_not_supported);
-    API_HANDLE_STATUS_CASE(variant_also_negociates);
+    API_HANDLE_STATUS_CASE(variant_also_negotiates);
     API_HANDLE_STATUS_CASE(insufficient_storage);
     API_HANDLE_STATUS_CASE(loop_detected);
     API_HANDLE_STATUS_CASE(not_extended);
@@ -176,11 +176,11 @@ String Http::get_header_field(StringView key) const {
     auto header_pair = HeaderField::from_string(line);
     header_pair.key().to_lower();
     if (header_pair.key() == String{key}.to_lower()) {
-      return String(header_pair.value());
+      return header_pair.value();
     }
   }
 
-  return String();
+  return {};
 }
 
 void Http::send(const Response &response) const {
@@ -197,8 +197,7 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
       const size_t page_size
         = options.page_size() > (size - i) ? size - i : options.page_size();
 
-      const auto chunk_message
-        = NumberString().format("%X\r\n", page_size);
+      const auto chunk_message = NumberString().format("%X\r\n", page_size);
 
       const size_t length = chunk_message.length() + page_size + 2;
       char small_buffer[length];
@@ -223,7 +222,8 @@ void Http::send(const Request &request) const {
 #if SHOW_HEADERS
   printf("%s\n%s\n", request.to_string().cstring(), header_fields().cstring());
 #endif
-  const auto request_string = request.to_string() + "\r\n" + header_fields() + "\r\n";
+  const auto request_string
+    = request.to_string() + "\r\n" + header_fields() + "\r\n";
   socket().write(request_string);
 }
 
@@ -402,18 +402,19 @@ HttpClient &HttpClient::execute_method(
       options.response->seek(get_file_pos, File::Whence::set);
     }
 
-    auto location = get_header_field("location");
-    if (location.is_empty() == false) {
-
-      if (location.string_view().find("/") != 0) {
+    const auto location = [&](StringView location_field) {
+      if (location_field.find("/") != 0) {
         // connect to another server
-        Url url(location);
+        Url url(location_field);
         connect(
           url.domain_name(),
           url.protocol() == Url::Protocol::https ? 443 : 80);
-        location = String(url.path());
+        return String{url.path()};
       }
+      return String{location_field};
+    }(get_header_field("location"));
 
+    if (!location.is_empty()) {
       return execute_method(method, location, options);
     }
   }
@@ -470,7 +471,7 @@ Http::HeaderField Http::HeaderField::from_string(StringView string) {
     value.replace(String::Replace().set_old_string("\r"))
       .replace(String::Replace().set_old_string("\n"));
   }
-  return Http::HeaderField(String(key.cstring()), value);
+  return {String{key.string_view()}, value};
 }
 
 HttpServer &HttpServer::run(
@@ -496,6 +497,24 @@ HttpServer &HttpServer::run(
     }
   }
 
+  return *this;
+}
+
+HttpServer &HttpServer::run(const Respond & respond) {
+  // read socket data
+  auto is_stop = false;
+  while (is_stop == false) {
+    m_request = Request(socket().gets());
+    if (m_request.method() != Method::null) {
+      if (is_error()) {
+        break;
+      }
+
+      set_header_fields(receive_header_fields());
+      // execute the method
+      is_stop = respond && (respond(this, m_request) == IsStop::yes);
+    }
+  }
   return *this;
 }
 
