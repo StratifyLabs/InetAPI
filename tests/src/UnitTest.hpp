@@ -95,7 +95,6 @@ public:
               .send(Http::Response(server->http_version(), Http::Status::ok))
               .send(ViewFile(View(hello_world)));
             show_incoming();
-
             break;
 
           case Http::Method::post:
@@ -104,7 +103,6 @@ public:
               .send(Http::Response(server->http_version(), Http::Status::ok))
               .send(incoming.seek(0));
             show_incoming();
-
             break;
 
           case Http::Method::put:
@@ -113,7 +111,6 @@ public:
               .send(Http::Response(server->http_version(), Http::Status::ok))
               .send(incoming.seek(0));
             show_incoming();
-
             break;
 
           case Http::Method::patch:
@@ -147,12 +144,14 @@ public:
     {
       m_is_listening = false;
       Printer::Object po(printer(), "httpClient/Server");
-      Thread server_thread = start_server(http_server);
+      auto server_thread = start_server(http_server);
       TEST_ASSERT(is_success());
 
       PRINTER_TRACE(printer(), "httpGet");
       HttpClient http_client;
       http_client.connect("localhost", m_server_port);
+
+      TEST_ASSERT(is_success());
 
       {
         DataFile response;
@@ -325,11 +324,15 @@ public:
                     .is_success());
 
 #if 0 && INET_API_IS_MBEDTLS
-      TEST_ASSERT(
-        HttpSecureClient()
-          .connect("ip.jsontest.com")
-          .get("/", Http::ExecuteMethod().set_response(&(response.seek(0))))
-          .is_success());
+//https://ip.jsontest.com fails in firefox too
+      {
+        Printer::Object secure_object(printer(), "SecureClientCase");
+        TEST_ASSERT(
+          HttpSecureClient()
+            .connect("ip.jsontest.com")
+            .get("/", Http::ExecuteMethod().set_response(&(response.seek(0))))
+            .is_success());
+      }
 #endif
     }
 
@@ -683,7 +686,7 @@ private:
   Thread start_server(bool (*server_function)(UnitTest *self)) {
     m_server_function = server_function;
     m_is_listening = false;
-    Thread server_thread
+    auto server_thread
       = Thread(Thread::Construct().set_argument(this).set_function(
         [](void *args) -> void * {
           UnitTest *self = reinterpret_cast<UnitTest *>(args);

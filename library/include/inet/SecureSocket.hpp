@@ -14,11 +14,12 @@
 
 namespace inet {
 
-typedef api::Api<mbedtls_api_t, MBEDTLS_API_REQUEST> SecureSocketApi;
+
+using SecureSocketApi = api::Api<mbedtls_api_t, MBEDTLS_API_REQUEST>;
 
 class SecureSocket : public Socket {
 public:
-  SecureSocket();
+  SecureSocket() = default;
 
   explicit SecureSocket(
     Domain domain,
@@ -26,13 +27,6 @@ public:
     Protocol protocol = Protocol::tcp);
 
   explicit SecureSocket(const SocketAddress &address);
-  ~SecureSocket();
-
-  SecureSocket(SecureSocket &&a) { std::swap(m_context, a.m_context); }
-  SecureSocket &operator=(SecureSocket &&a) {
-    std::swap(m_context, a.m_context);
-    return *this;
-  }
 
   SecureSocket &set_ticket_lifetime(u32 seconds) {
     m_ticket_lifetime_seconds = seconds;
@@ -47,14 +41,13 @@ public:
   }
 
 private:
-  static SecureSocketApi api() { return m_api; }
-  static SecureSocketApi m_api;
   u32 m_ticket_lifetime_seconds = 60 * 60 * 24UL; // one day
 
-  mutable var::Data m_ticket;
-  mutable void *m_context = nullptr;
+  static void deleter(void * context);
+  using SocketPointer = api::UniquePointer<void, decltype(&deleter)>;
 
-  int internal_close() const;
+  mutable var::Data m_ticket;
+  mutable SocketPointer m_context = {nullptr, nullptr};
 
   int interface_connect(const SocketAddress &address) const override final;
   int interface_bind_and_listen(const SocketAddress &address, int backlog)

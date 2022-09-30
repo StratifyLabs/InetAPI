@@ -5,47 +5,60 @@
 
 using namespace inet;
 
-SecureSocketApi SecureSocket::m_api;
+namespace {
 
-SecureSocket::SecureSocket() { initialize(); }
+SecureSocketApi &secure_socket_api() {
+  static SecureSocketApi instance;
+  return instance;
+}
 
-SecureSocket::SecureSocket(Domain domain, Type type, Protocol protocol) {
-  API_RETURN_IF_ERROR();
-  set_family(domain);
-
+void *open_socket(int domain, int type, int protocol) {
+  void *result;
   API_SYSTEM_CALL(
-    "",
-    api()->socket(
-      &m_context,
+    "secure socket()",
+    secure_socket_api()->socket(&result, domain, type, protocol));
+  return result;
+}
+
+int close_socket(void *context) {
+  int result = 0;
+  if (context) {
+    result = secure_socket_api()->close(&context);
+  }
+  return result;
+}
+} // namespace
+
+SecureSocket::SecureSocket(Domain domain, Type type, Protocol protocol)
+  : m_context(
+    open_socket(
       static_cast<int>(domain),
       static_cast<int>(type),
-      static_cast<int>(protocol)));
+      static_cast<int>(protocol)),
+    &deleter) {
+  API_RETURN_IF_ERROR();
+  set_family(domain);
 }
 
-SecureSocket::SecureSocket(const SocketAddress &address) {
-  API_RETURN_IF_ERROR();
-  set_family(address.family());
-
-  API_SYSTEM_CALL(
-    "",
-    api()->socket(
-      &m_context,
+SecureSocket::SecureSocket(const SocketAddress &address)
+  : m_context(
+    open_socket(
       static_cast<int>(address.family()),
       static_cast<int>(address.type()),
-      static_cast<int>(address.protocol())));
+      static_cast<int>(address.protocol())),
+    &deleter) {
+  API_RETURN_IF_ERROR();
+  set_family(address.family());
 }
 
-SecureSocket::~SecureSocket() {
-  internal_close();
-  finalize();
-}
+void SecureSocket::deleter(void *context) { close_socket(context); }
 
 int SecureSocket::interface_connect(const SocketAddress &address) const {
   int result;
 
   if (m_ticket.size() > 0) {
-    result = api()->parse_ticket(
-      m_context,
+    result = secure_socket_api()->parse_ticket(
+      m_context.get(),
       var::View(m_ticket).to_void(),
       m_ticket.size());
     if (result < 0) {
@@ -53,8 +66,8 @@ int SecureSocket::interface_connect(const SocketAddress &address) const {
     }
   }
 
-  result = api()->connect(
-    m_context,
+  result = secure_socket_api()->connect(
+    m_context.get(),
     address.to_sockaddr(),
     address.length(),
     address.canon_name().cstring());
@@ -63,7 +76,7 @@ int SecureSocket::interface_connect(const SocketAddress &address) const {
   if (m_ticket_lifetime_seconds && result == 0) {
     m_ticket.resize(2619);
     do {
-      result = api()->write_ticket(
+      result = secure_socket_api()->write_ticket(
         m_context,
         m_ticket.data(),
         m_ticket.size(),
@@ -74,8 +87,8 @@ int SecureSocket::interface_connect(const SocketAddress &address) const {
       }
 #endif
     } while (
-#if 0
-						(result == MBEDTLS_ERR_SSL_BUFFER_TOO_SMALL) &&
+#if 1
+      (result == MBEDTLS_ERR_SSL_BUFFER_TOO_SMALL) &&
 #endif
       (m_ticket.size() < 4096));
 
@@ -98,15 +111,15 @@ int SecureSocket::interface_shutdown(const fs::OpenMode how) const {
   MCU_UNUSED_ARGUMENT(how);
   // this should call shutdown() to shutdown for either reading or writing
   // close() will still be called on deconstruction
-  return internal_close();
+  return 0;
 }
 
 int SecureSocket::interface_write(const void *buf, int nbyte) const {
   int bytes_written = 0;
   int result;
   do {
-    result = api()->write(
-      m_context,
+    result = secure_socket_api()->write(
+      m_context.get(),
       (const u8 *)buf + bytes_written,
       nbyte - bytes_written);
     if (result > 0) {
@@ -120,19 +133,15 @@ int SecureSocket::interface_write(const void *buf, int nbyte) const {
 }
 
 int SecureSocket::interface_read(void *buf, int nbyte) const {
-  int result = api()->read(m_context, buf, nbyte);
+  int result = secure_socket_api()->read(m_context.get(), buf, nbyte);
   if (result < 0) {
-    printf("ss returned: %d (0x%04x) %p %p %d\n", result, result * -1,
-           m_context, buf, nbyte);
-  }
-  return result;
-}
-
-int SecureSocket::internal_close() const {
-  int result = 0;
-  if (m_context) {
-    result = api()->close(&m_context);
-    m_context = nullptr;
+    printf(
+      "ss returned: %d (0x%04x) %p %p %d\n",
+      result,
+      result * -1,
+      m_context.get(),
+      buf,
+      nbyte);
   }
   return result;
 }

@@ -7,6 +7,7 @@
 ## Bug Fixes
 
 - Minor fixes and improvements via clang-tidy
+- Use `api::SystemResource` and `api::UniquePointer` for `inet::Socket` and `inet::SecureSocket`
 
 # Version 1.4.0
 

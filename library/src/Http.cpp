@@ -7,9 +7,9 @@
 #include "inet/Http.hpp"
 #include "inet/Url.hpp"
 
-#define SHOW_HEADERS 0
+#define SHOW_HEADERS 1
 #if defined __link
-#define AGGREGATE_TRAFFIC(msg) (m_traffic += msg)
+#define AGGREGATE_TRAFFIC(msg) (m_traffic += (msg))
 #else
 #define AGGREGATE_TRAFFIC(msg)
 #endif
@@ -173,9 +173,8 @@ String Http::get_header_field(StringView key) const {
   ViewFile header_view_file(View(header_fields().string_view()));
   GeneralString line;
   while ((line = header_view_file.gets()).is_empty() == false) {
-    auto header_pair = HeaderField::from_string(line);
-    header_pair.key().to_lower();
-    if (header_pair.key() == String{key}.to_lower()) {
+    const auto header_pair = HeaderField::from_string(line);
+    if (header_pair.key() == KeyString{key}.to_lower().string_view()) {
       return header_pair.value();
     }
   }
@@ -194,12 +193,12 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
     const size_t size = file.size();
     size_t i = 0;
     do {
-      const size_t page_size
+      const auto page_size
         = options.page_size() > (size - i) ? size - i : options.page_size();
 
       const auto chunk_message = NumberString().format("%X\r\n", page_size);
 
-      const size_t length = chunk_message.length() + page_size + 2;
+      const auto length = chunk_message.length() + page_size + 2;
       char small_buffer[length];
 
       ViewFile small_write(View(small_buffer, length));
@@ -220,7 +219,14 @@ void Http::send(const fs::FileObject &file, const Send &options) const {
 
 void Http::send(const Request &request) const {
 #if SHOW_HEADERS
-  printf("%s\n%s\n", request.to_string().cstring(), header_fields().cstring());
+  {
+    auto headers = header_fields();
+    printf(
+      "> %s\n> %s\n",
+      request.to_string().cstring(),
+      headers.replace(String::Replace{.new_string = "\n> ", .old_string = "\n"})
+        .cstring());
+  }
 #endif
   const auto request_string
     = request.to_string() + "\r\n" + header_fields() + "\r\n";
@@ -242,28 +248,28 @@ String Http::receive_header_fields() {
 
     AGGREGATE_TRAFFIC(String("> ") + line);
 #if SHOW_HEADERS
-    printf("> %s", line.cstring());
+    printf("< %s", line.cstring());
 #endif
     if (line.length() > 2) {
       result += line;
-      const Http::HeaderField attribute = HeaderField::from_string(line);
+      const auto attribute = HeaderField::from_string(line);
 
-      if (attribute.key() == "CONTENT-LENGTH") {
+      if (attribute.key() == "content-length") {
         m_content_length
           = static_cast<unsigned int>(attribute.value().to_integer());
       }
 
-      if (attribute.key() == "CONTENT-TYPE") {
-        // check for evnt streams
-        StringViewList tokens = attribute.value().split(" ;");
-        if (KeyString(tokens.at(0)).to_upper() == "TEXT/EVENT-STREAM") {
+      if (attribute.key() == "content-type") {
+        // check for event streams
+        const auto tokens = attribute.value().split(" ;");
+        if (KeyString(tokens.at(0)).to_lower() == "text/event-stream") {
           // accept data until the operation is cancelled
           m_content_length = FSAPI_LINK_DEFAULT_PAGE_SIZE;
         }
       }
 
       if (
-        attribute.key() == "TRANSFER-ENCODING"
+        attribute.key() == "transfer-encoding"
         && (KeyString(attribute.value()).to_lower() == "chunked")) {
         m_is_transfer_encoding_chunked = true;
       }
@@ -282,7 +288,7 @@ void Http::receive(const fs::FileObject &file, const Receive &options) const {
     // read chunk by chunk
     int chunk_size = 0;
     int bytes_received = 0;
-    char newline[2];
+    Array<char, 2> newline;
     do {
       chunk_size = get_chunk_size();
       file.write(
@@ -373,7 +379,7 @@ HttpClient &HttpClient::execute_method(
 
   m_response = Response(socket().gets());
 #if SHOW_HEADERS
-  printf("%s\n", m_response.to_string().cstring());
+  printf("< %s\n", m_response.to_string().cstring());
 #endif
   set_header_fields(receive_header_fields());
 
@@ -456,22 +462,17 @@ HttpClient &HttpClient::connect(StringView domain_name, u16 port) {
 }
 
 Http::HeaderField Http::HeaderField::from_string(StringView string) {
-  const size_t colon_pos = string.find(":");
+  const auto colon_pos = string.find(":");
+  const auto key
+    = KeyString(string.get_substring_with_length(colon_pos)).to_lower();
 
-  const KeyString key = std::move(
-    KeyString(string.get_substring_with_length(colon_pos)).to_upper());
+  auto value = colon_pos != String::npos
+                 ? string.get_substring_at_position(colon_pos + 1)
+                     .strip_leading_whitespace()
+                     .strip_trailing_whitespace()
+                 : StringView{};
 
-  String value;
-  if (colon_pos != String::npos) {
-    value = String(string.get_substring_at_position(colon_pos + 1));
-    if (value.at(0) == ' ') {
-      value.pop_front();
-    }
-
-    value.replace(String::Replace().set_old_string("\r"))
-      .replace(String::Replace().set_old_string("\n"));
-  }
-  return {String{key.string_view()}, value};
+  return {String{key.string_view()}, String{value}};
 }
 
 HttpServer &HttpServer::run(
@@ -500,7 +501,7 @@ HttpServer &HttpServer::run(
   return *this;
 }
 
-HttpServer &HttpServer::run(const Respond & respond) {
+HttpServer &HttpServer::run(const Respond &respond) {
   // read socket data
   auto is_stop = false;
   while (is_stop == false) {
@@ -519,6 +520,6 @@ HttpServer &HttpServer::run(const Respond & respond) {
 }
 
 u16 inet::get_pseudorandom_server_port() {
-  u16 result = chrono::ClockTime::get_system_time().nanoseconds() / 1000;
+  auto result = u16(chrono::ClockTime::get_system_time().nanoseconds() / 1000);
   return (result % (65535 - 49152)) + 49152;
 }

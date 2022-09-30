@@ -165,8 +165,8 @@ public:
     HeaderField() = default;
     HeaderField(var::StringView key, var::StringView value)
       : var::Pair<var::String>(
-        var::String(key).to_upper(),
-        var::String(value)) {}
+        var::String{key}.to_lower(),
+        var::String{value}) {}
 
     static HeaderField from_string(var::StringView string);
     API_NO_DISCARD var::GeneralString to_string() const {
