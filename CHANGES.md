@@ -3,6 +3,7 @@
 ## New Features
 
 - Update `HttpClient` APIs to combine data and method requests in one object
+- Use `cmsdk2_` functions for build
 
 ## Bug Fixes
 

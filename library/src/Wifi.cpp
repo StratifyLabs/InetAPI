@@ -1,8 +1,10 @@
 // Copyright 2016-2021 Tyler Gilbert and Stratify Labs, Inc; see LICENSE.md
 
+
+#include <printer/Printer.hpp>
+#include <chrono.hpp>
+
 #include "inet/Wifi.hpp"
-#include "chrono.hpp"
-#include "printer/Printer.hpp"
 
 #if defined __StratifyOS__ || INET_API_HAS_STRATIFY_OS
 
