@@ -1,4 +1,3 @@
-
 set(LIBRARIES FsAPI)
 if(${CMSDK_IS_LINK} AND INET_API_IS_MBEDTLS)
   list(APPEND LIBRARIES mbedtls)
@@ -6,12 +5,10 @@ endif()
 if(${CMSDK_IS_LINK} AND INET_API_HAS_STRATIFY_OS)
   list(APPEND LIBRARIES StratifyOS)
 endif()
-
 api2_add_library(
   NAME ${PROJECT_NAME}
   DEPENDENCIES ${LIBRARIES}
-  TARGETS TARGET_LIST
-)
+  TARGETS TARGET_LIST)
 
 function(add_inet_api_is_mbedtls TARGET)
   if(${INET_API_IS_MBEDTLS})
@@ -21,8 +18,7 @@ function(add_inet_api_is_mbedtls TARGET)
   endif()
   target_compile_definitions(${TARGET}
     PUBLIC
-    INET_API_IS_MBEDTLS=${INET_API_IS_MBEDTLS_VALUE}
-    )
+    INET_API_IS_MBEDTLS=${INET_API_IS_MBEDTLS_VALUE})
 endfunction()
 
 foreach(TARGET ${TARGET_LIST})
@@ -31,8 +27,7 @@ foreach(TARGET ${TARGET_LIST})
     if(INET_API_HAS_STRATIFY_OS)
       target_compile_definitions(${TARGET}
         PUBLIC
-        INET_API_HAS_STRATIFY_OS=1
-        )
+        INET_API_HAS_STRATIFY_OS=1)
     endif()
   else()
     target_include_directories(${TARGET}
@@ -41,7 +36,6 @@ foreach(TARGET ${TARGET_LIST})
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../lwip/include>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls>
       $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../mbedtls/mbedtls/include>
-      PRIVATE
-      )
+      PRIVATE)
   endif()
 endforeach()
