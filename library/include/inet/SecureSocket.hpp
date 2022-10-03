@@ -49,13 +49,13 @@ private:
   mutable var::Data m_ticket;
   mutable SocketPointer m_context = {nullptr, nullptr};
 
-  int interface_connect(const SocketAddress &address) const override final;
+  int interface_connect(const SocketAddress &address) const final;
   int interface_bind_and_listen(const SocketAddress &address, int backlog)
     const override final;
 
   int interface_shutdown(const fs::OpenMode how) const final;
-  int interface_read(void *buf, int nbyte) const override final;
-  int interface_write(const void *buf, int nbyte) const override final;
+  int interface_read(void *buf, int nbyte) const final;
+  int interface_write(const void *buf, int nbyte) const final;
 };
 
 } // namespace inet
