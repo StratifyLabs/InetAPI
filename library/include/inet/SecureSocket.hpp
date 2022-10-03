@@ -41,7 +41,7 @@ public:
   }
 
 private:
-  u32 m_ticket_lifetime_seconds = 60 * 60 * 24UL; // one day
+  unsigned int m_ticket_lifetime_seconds = 60U * 60U * 24U; // one day
 
   static void deleter(void * context);
   using SocketPointer = api::UniquePointer<void, decltype(&deleter)>;
