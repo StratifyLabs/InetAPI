@@ -315,8 +315,8 @@ public:
 
   template <typename FileObjectType>
   HttpClient &
-  put(var::StringView path, const MethodExchange<FileObjectType> &request) {
-    return execute_method(Method::put, path, request.get_execute_method());
+  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) {
+    return execute_method(Method::put, path, exchange.get_execute_method());
   }
 
   HttpClient &patch(var::StringView path, const Patch &options) {
@@ -325,8 +325,8 @@ public:
 
   template <typename FileObjectType>
   HttpClient &
-  patch(var::StringView path, const MethodExchange<FileObjectType> &request) {
-    return execute_method(Method::patch, path, request.get_execute_method());
+  patch(var::StringView path, const MethodExchange<FileObjectType> &exchange) {
+    return execute_method(Method::patch, path, exchange.get_execute_method());
   }
 
   template <typename FileObjectType>
@@ -391,6 +391,12 @@ public:
 
   HttpSecureClient &get(var::StringView path, const Get &options) {
     return execute_method(Method::get, path, options);
+  }
+
+  template <typename FileObjectType>
+  HttpSecureClient &
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) {
+    return execute_method(Method::get, path, response.get_execute_method());
   }
 
   HttpSecureClient &post(var::StringView path, const Post &options) {
