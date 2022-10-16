@@ -2,6 +2,7 @@
 
 ## New Features
 
+- Migrate to `API` v1.6
 - Update `HttpClient` APIs to combine data and method requests in one object
 - Use `cmsdk2_` functions for build
 

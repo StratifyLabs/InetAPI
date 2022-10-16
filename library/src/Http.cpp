@@ -172,7 +172,7 @@ void Http::add_header_fields(StringView fields) {
 String Http::get_header_field(StringView key) const {
   ViewFile header_view_file(View(header_fields().string_view()));
   GeneralString line;
-  while ((line = header_view_file.gets()).is_empty() == false) {
+  while ((line = header_view_file.get_line()).is_empty() == false) {
     const auto header_pair = HeaderField::from_string(line);
     if (header_pair.key() == KeyString{key}.to_lower().string_view()) {
       return header_pair.value();
@@ -234,8 +234,8 @@ void Http::send(const Request &request) const {
 }
 
 int Http::get_chunk_size() const {
-  auto line = socket().gets();
-  return line.string_view().to_unsigned_long(StringView::Base::hexadecimal);
+  return socket().get_line<NumberString>().string_view().to_unsigned_long(
+    StringView::Base::hexadecimal);
 }
 
 String Http::receive_header_fields() {
@@ -244,7 +244,7 @@ String Http::receive_header_fields() {
 
   result.reserve(512);
   do {
-    line = socket().gets('\n');
+    line = socket().get_line('\n');
 
     AGGREGATE_TRAFFIC(String("> ") + line);
 #if SHOW_HEADERS
@@ -377,7 +377,7 @@ HttpClient &HttpClient::execute_method(
         .set_progress_callback(options.progress_callback));
   }
 
-  m_response = Response(socket().gets());
+  m_response = Response(socket().get_line());
 #if SHOW_HEADERS
   printf("< %s\n", m_response.to_string().cstring());
 #endif
@@ -486,7 +486,7 @@ HttpServer &HttpServer::run(
 
   bool is_stop = false;
   while (is_stop == false) {
-    m_request = Request(socket().gets());
+    m_request = Request(socket().get_line());
     if (m_request.method() != Method::null) {
       if (is_error()) {
         break;
@@ -505,7 +505,7 @@ HttpServer &HttpServer::run(const Respond &respond) {
   // read socket data
   auto is_stop = false;
   while (is_stop == false) {
-    m_request = Request(socket().gets());
+    m_request = Request(socket().get_line());
     if (m_request.method() != Method::null) {
       if (is_error()) {
         break;
