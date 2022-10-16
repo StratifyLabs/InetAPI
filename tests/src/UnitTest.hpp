@@ -154,22 +154,20 @@ public:
       TEST_ASSERT(is_success());
 
       {
-        DataFile response;
-        TEST_ASSERT(
-          http_client.get("index.html", Http::Get().set_response(&response))
-            .is_success());
+        auto response = Http::MethodResponse<DataFile>();
+        TEST_ASSERT(http_client.get("index.html", response).is_success());
 
         printer().key(
           "serverResponse",
-          StringView(response.data().add_null_terminator()));
+          StringView(response.file.data().add_null_terminator()));
         TEST_ASSERT(
-          StringView(response.data().add_null_terminator()) == "Hello World");
+          StringView(response.file.data().add_null_terminator())
+          == "Hello World");
       }
 
       {
         Http::MethodResponse<DataFile> response;
-        TEST_ASSERT(http_client.get("index.html", response.get_execute_method())
-                      .is_success());
+        TEST_ASSERT(http_client.get("index.html", response).is_success());
 
         printer().key(
           "serverResponse",
@@ -184,9 +182,7 @@ public:
         Http::MethodExchange<DataFile> exchange(
           DataFile().write("Special Request").seek(0));
 
-        TEST_ASSERT(
-          http_client.post("index.html", exchange.get_execute_method())
-            .is_success());
+        TEST_ASSERT(http_client.post("index.html", exchange).is_success());
 
         printer().key(
           "request",
@@ -200,48 +196,33 @@ public:
 
       {
 
-        DataFile response;
-        DataFile request;
-        request.data().copy(View(StringView("Special Request")));
-
-        TEST_ASSERT(
-          http_client
-            .post(
-              "index.html",
-              Http::Post().set_request(&request).set_response(&response))
-            .is_success());
+        auto exchange
+          = Http::MethodExchange(DataFile().write("Special Request").seek(0));
+        TEST_ASSERT(http_client.post("index.html", exchange).is_success());
 
         printer().key(
           "request",
-          View(request.data()).to_string<GeneralString>());
+          View(exchange.request.data()).to_string<GeneralString>());
         printer().key(
           "response",
-          View(response.data()).to_string<GeneralString>());
+          View(exchange.response.data()).to_string<GeneralString>());
 
-        TEST_ASSERT(request.data() == response.data());
+        TEST_ASSERT(exchange.request.data() == exchange.response.data());
       }
 
       {
-
-        DataFile response;
-        DataFile request;
-        request.data().copy(View(StringView("Special Request Post")));
-
-        TEST_ASSERT(
-          http_client
-            .post(
-              "index.html",
-              Http::Post().set_request(&request).set_response(&response))
-            .is_success());
+        auto exchange = Http::MethodExchange(
+          DataFile().write("Special Request Post").seek(0));
+        TEST_ASSERT(http_client.post("index.html", exchange).is_success());
 
         printer().key(
           "request",
-          View(request.data()).to_string<GeneralString>());
+          View(exchange.request.data()).to_string<GeneralString>());
         printer().key(
           "response",
-          View(response.data()).to_string<GeneralString>());
+          View(exchange.response.data()).to_string<GeneralString>());
 
-        TEST_ASSERT(request.data() == response.data());
+        TEST_ASSERT(exchange.request.data() == exchange.response.data());
       }
 
       {
@@ -279,12 +260,10 @@ public:
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
 
       {
-        DataFile response;
         printer().key("is", StringView("getting"));
-        TEST_EXPECT(
-          http_client.get("/get", Http::ExecuteMethod().set_response(&response))
-            .is_success());
-        printer().key("response", response.data().add_null_terminator());
+        auto response = Http::MethodResponse<DataFile>();
+        TEST_EXPECT(http_client.get("/get", response).is_success());
+        printer().key("response", response.file.data().add_null_terminator());
       }
 
       {
@@ -296,17 +275,14 @@ public:
 
       {
         printer().key("is", StringView("putting"));
-        DataFile request;
-        request.data().copy(View(StringView("HelloWorld")));
-        DataFile response;
-        TEST_EXPECT(
-          http_client.put("/put", Http::ExecuteMethod().set_response(&response))
-            .is_success());
-        printer().key("response", response.data().add_null_terminator());
+        auto exchange
+          = Http::MethodRequest(DataFile().write("HelloWorld").seek(0));
+        TEST_EXPECT(http_client.put("/put", exchange).is_success());
+        printer().key("response", exchange.file.data().add_null_terminator());
       }
 
       {
-        Http::MethodRequest<DataFile> request(
+        auto request = Http::MethodRequest<DataFile>(
           DataFile().write("HelloWorld").seek(0));
         printer().key("is", StringView("putting"));
         TEST_EXPECT(http_client.put("/put", request).is_success());
@@ -316,11 +292,9 @@ public:
 
     if (1) {
       Printer::Object po(printer(), "ip.jsontest.com");
-
-      DataFile response;
       TEST_ASSERT(HttpClient()
                     .connect("ip.jsontest.com")
-                    .get("/", Http::ExecuteMethod().set_response(&response))
+                    .get("/", Http::MethodResponse<NullFile>())
                     .is_success());
 
 #if 0 && INET_API_IS_MBEDTLS
@@ -342,18 +316,17 @@ public:
       HttpClient http_client;
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
       {
-        DataFile response;
-        TEST_ASSERT(http_client.set_follow_redirects(false)
-                      .get(
-                        "/redirect-to?url=httpbin.org&status_code=200",
-                        Http::ExecuteMethod().set_response(&response))
-                      .is_success());
+        auto response = Http::MethodResponse<DataFile>();
+        TEST_ASSERT(
+          http_client.set_follow_redirects(false)
+            .get("/redirect-to?url=httpbin.org&status_code=200", response)
+            .is_success());
 
         const auto location = http_client.get_header_field("location");
         TEST_EXPECT(location == "httpbin.org");
         printer().key("location", location);
-        if (response.size()) {
-          printer().key("response", response.data().add_null_terminator());
+        if (response.file.size()) {
+          printer().key("response", response.file.data().add_null_terminator());
         }
       }
       return true;
@@ -367,12 +340,10 @@ public:
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
 
       {
-        DataFile response;
-        TEST_ASSERT(
-          http_client.get("/get", Http::ExecuteMethod().set_response(&response))
-            .is_success());
-        if (response.size()) {
-          printer().key("response", response.data().add_null_terminator());
+        auto response = Http::MethodResponse<DataFile>();
+        TEST_ASSERT(http_client.get("/get", response).is_success());
+        if (response.file.size()) {
+          printer().key("response", response.file.data().add_null_terminator());
         }
       }
     }
@@ -386,14 +357,14 @@ public:
       TEST_ASSERT(http_client.connect("github.com").is_success());
 
       {
-        DataFile response;
+        auto response = Http::MethodResponse<DataFile>();
         TEST_ASSERT(
           http_client
             .get(
               "/StratifyLabs/StratifyAPI/blob/master/src/inet/Socket.cpp",
-              Http::ExecuteMethod().set_response(&response))
+              response)
             .is_success());
-        TEST_ASSERT(response.size() > 0);
+        TEST_ASSERT(response.file.size() > 0);
       }
     }
 
