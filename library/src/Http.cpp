@@ -433,7 +433,7 @@ HttpClient &HttpClient::execute_method(
   return *this;
 }
 
-HttpClient &HttpClient::connect(StringView domain_name, u16 port) {
+HttpClient &HttpClient::connect(StringView domain_name, u16 port) & {
   API_RETURN_VALUE_IF_ERROR(*this);
   AddressInfo address_info(
     AddressInfo::Construct()

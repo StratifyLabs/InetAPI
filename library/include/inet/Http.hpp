@@ -284,55 +284,103 @@ class HttpClient : public Http {
 public:
   HttpClient(var::StringView http_version = "HTTP/1.1");
 
-  HttpClient &get(var::StringView path, const Get &options) {
+  [[deprecated(
+    "Use get(var::StringView, const MethodResponse<FileObjectType> "
+    "&)")]] HttpClient &
+  get(var::StringView path, const Get &options) {
     return execute_method(Method::get, path, options);
   }
 
   template <typename FileObjectType>
   HttpClient &
-  get(var::StringView path, const MethodResponse<FileObjectType> &response) {
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) & {
     return execute_method(Method::get, path, response.get_execute_method());
   }
+  template <typename FileObjectType>
+  HttpClient &&
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) && {
+    return std::move(get(path, response));
+  }
 
-  HttpClient &post(var::StringView path, const Post &options) {
+  [[deprecated(
+    "Use post(var::StringView, const MethodExchange<FileObjectType> "
+    "&)")]] HttpClient &
+  post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
+
   template <typename FileObjectType>
   HttpClient &
-  post(var::StringView path, const MethodExchange<FileObjectType> &request) {
+  post(var::StringView path, const MethodExchange<FileObjectType> &request) & {
     return execute_method(Method::post, path, request.get_execute_method());
   }
+  template <typename FileObjectType>
+  HttpClient &&
+  post(var::StringView path, const MethodExchange<FileObjectType> &request) && {
+    return std::move(post(path, request));
+  }
 
-  HttpClient &put(var::StringView path, const Put &options) {
+  [[deprecated(
+    "Use put(var::StringView, const MethodRequest<FileObjectType> "
+    "&) or put(var::StringView path, const "
+    "MethodExchange<FileObjectType> &exchange)")]] HttpClient &
+  put(var::StringView path, const Put &options) & {
     return execute_method(Method::put, path, options);
   }
 
   template <typename FileObjectType>
   HttpClient &
-  put(var::StringView path, const MethodRequest<FileObjectType> &request) {
+  put(var::StringView path, const MethodRequest<FileObjectType> &request) & {
     return execute_method(Method::put, path, request.get_execute_method());
+  }
+  template <typename FileObjectType>
+  HttpClient &&
+  put(var::StringView path, const MethodRequest<FileObjectType> &request) && {
+    return std::move(put(path, request));
   }
 
   template <typename FileObjectType>
   HttpClient &
-  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) {
+  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) & {
     return execute_method(Method::put, path, exchange.get_execute_method());
   }
+  template <typename FileObjectType>
+  HttpClient &&
+  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) && {
+    return std::move(put(path, exchange));
+  }
 
-  HttpClient &patch(var::StringView path, const Patch &options) {
+  [[deprecated(
+    "Use patch(var::StringView, const MethodExchange<FileObjectType> "
+    "&)")]] HttpClient &
+  patch(var::StringView path, const Patch &options) {
     return execute_method(Method::patch, path, options);
   }
 
   template <typename FileObjectType>
-  HttpClient &
-  patch(var::StringView path, const MethodExchange<FileObjectType> &exchange) {
+  HttpClient &patch(
+    var::StringView path,
+    const MethodExchange<FileObjectType> &exchange) & {
     return execute_method(Method::patch, path, exchange.get_execute_method());
   }
 
   template <typename FileObjectType>
+  HttpClient &&patch(
+    var::StringView path,
+    const MethodExchange<FileObjectType> &exchange) && {
+    return std::move(patch(path, exchange));
+  }
+
+  template <typename FileObjectType>
   HttpClient &
-  patch(var::StringView path, const MethodRequest<FileObjectType> &request) {
+  patch(var::StringView path, const MethodRequest<FileObjectType> &request) & {
     return execute_method(Method::patch, path, request.get_execute_method());
+  }
+
+  template <typename FileObjectType>
+  HttpClient &&
+  patch(var::StringView path, const MethodRequest<FileObjectType> &request) && {
+    return std::move(patch(path, request));
   }
 
   // http delete
@@ -358,14 +406,21 @@ public:
     return *this;
   }
 
-  HttpClient &connect(var::StringView domain_name, u16 port = 80);
+  HttpClient &connect(var::StringView domain_name, u16 port = 80) &;
+  HttpClient &&connect(var::StringView domain_name, u16 port = 80) && {
+    return std::move(connect(domain_name, port));
+  }
 
   virtual Socket &socket() override { return m_socket; }
   virtual const Socket &socket() const override { return m_socket; }
 
-  HttpClient &set_follow_redirects(bool value = true) {
+  HttpClient &set_follow_redirects(bool value = true) & {
     m_is_follow_redirects = value;
     return *this;
+  }
+
+  HttpClient &&set_follow_redirects(bool value = true) && {
+    return std::move(set_follow_redirects(value));
   }
 
 private:
@@ -389,25 +444,87 @@ public:
   explicit HttpSecureClient(var::StringView http_version = "HTTP/1.1")
     : HttpClient(http_version) {}
 
-  HttpSecureClient &get(var::StringView path, const Get &options) {
+  [[deprecated(
+    "Use get(var::StringView, const MethodResponse<FileObjectType> "
+    "&)")]] HttpSecureClient &
+  get(var::StringView path, const Get &options) {
     return execute_method(Method::get, path, options);
   }
 
   template <typename FileObjectType>
   HttpSecureClient &
-  get(var::StringView path, const MethodResponse<FileObjectType> &response) {
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) & {
     return execute_method(Method::get, path, response.get_execute_method());
   }
+  template <typename FileObjectType>
+  HttpSecureClient &&
+  get(var::StringView path, const MethodResponse<FileObjectType> &response) && {
+    return std::move(get(path, response));
+  }
 
+  [[deprecated(
+    "Use post(var::StringView, const MethodExchange<FileObjectType> "
+    "&)")]]
   HttpSecureClient &post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
+  template <typename FileObjectType>
+  HttpSecureClient &
+  post(var::StringView path, const MethodExchange<FileObjectType> &request) & {
+    return execute_method(Method::post, path, request.get_execute_method());
+  }
+  template <typename FileObjectType>
+  HttpSecureClient &&
+  post(var::StringView path, const MethodExchange<FileObjectType> &request) && {
+    return std::move(post(path, request));
+  }
+
+  [[deprecated(
+    "Use put(var::StringView, const MethodExchange<FileObjectType> "
+    "&)")]]
   HttpSecureClient &put(var::StringView path, const Put &options) {
     return execute_method(Method::put, path, options);
   }
 
+  template <typename FileObjectType>
+  HttpSecureClient &
+  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) & {
+    return execute_method(Method::put, path, exchange.get_execute_method());
+  }
+  template <typename FileObjectType>
+  HttpSecureClient &&
+  put(var::StringView path, const MethodExchange<FileObjectType> &exchange) && {
+    return std::move(put(path, exchange));
+  }
+
   HttpSecureClient &patch(var::StringView path, const Patch &options) {
     return execute_method(Method::patch, path, options);
+  }
+
+  template <typename FileObjectType>
+  HttpSecureClient &patch(
+    var::StringView path,
+    const MethodExchange<FileObjectType> &exchange) & {
+    return execute_method(Method::patch, path, exchange.get_execute_method());
+  }
+
+  template <typename FileObjectType>
+  HttpSecureClient &&patch(
+    var::StringView path,
+    const MethodExchange<FileObjectType> &exchange) && {
+    return std::move(patch(path, exchange));
+  }
+
+  template <typename FileObjectType>
+  HttpSecureClient &
+  patch(var::StringView path, const MethodRequest<FileObjectType> &request) & {
+    return execute_method(Method::patch, path, request.get_execute_method());
+  }
+
+  template <typename FileObjectType>
+  HttpSecureClient &&
+  patch(var::StringView path, const MethodRequest<FileObjectType> &request) && {
+    return std::move(patch(path, request));
   }
 
   // http delete
@@ -437,14 +554,22 @@ public:
     return *this;
   }
 
-  HttpSecureClient &connect(var::StringView domain_name, u16 port = 443) {
+  HttpSecureClient &connect(var::StringView domain_name, u16 port = 443) & {
     HttpClient::connect(domain_name, port);
     return *this;
   }
 
-  HttpSecureClient &set_follow_redirects(bool value = true) {
+  HttpSecureClient &&connect(var::StringView domain_name, u16 port = 443) && {
+    return std::move(connect(domain_name, port));
+  }
+
+  HttpSecureClient &set_follow_redirects(bool value = true) & {
     HttpClient::set_follow_redirects(value);
     return *this;
+  }
+
+  HttpSecureClient &&set_follow_redirects(bool value = true) && {
+    return std::move(set_follow_redirects(value));
   }
 
   Socket &socket() override { return m_socket; }

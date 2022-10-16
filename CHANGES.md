@@ -5,6 +5,8 @@
 - Migrate to `API` v1.6
 - Update `HttpClient` APIs to combine data and method requests in one object
 - Use `cmsdk2_` functions for build
+- Deprecated unsafe Http request functions
+- Added `rvalue` ref qualifier functions for Http requests
 
 ## Bug Fixes
 
