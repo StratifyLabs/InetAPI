@@ -166,7 +166,7 @@ public:
       TEST_ASSERT(is_success());
 
       {
-        auto response = Http::MethodResponse<DataFile>();
+        auto response = Http::MethodResponse(DataFile());
         TEST_ASSERT(http_client.get("index.html", response).is_success());
 
         printer().key(
@@ -178,7 +178,7 @@ public:
       }
 
       {
-        Http::MethodResponse<DataFile> response;
+        auto response = Http::MethodResponse(DataFile());
         TEST_ASSERT(http_client.get("index.html", response).is_success());
 
         printer().key(
@@ -273,13 +273,13 @@ public:
 
       {
         printer().key("is", StringView("getting"));
-        auto response = Http::MethodResponse<DataFile>();
+        auto response = Http::MethodResponse(DataFile());
         TEST_EXPECT(http_client.get("/get", response).is_success());
         printer().key("response", response.file.data().add_null_terminator());
       }
 
       {
-        Http::MethodResponse<DataFile> response;
+        auto response = Http::MethodResponse(DataFile());
         printer().key("is", StringView("getting"));
         TEST_EXPECT(http_client.get("/get", response).is_success());
         printer().key("response", response.file.data().add_null_terminator());
@@ -305,7 +305,7 @@ public:
       Printer::Object po(printer(), "ip.jsontest.com");
       TEST_ASSERT(HttpClient()
                     .connect("ip.jsontest.com")
-                    .get("/", Http::MethodResponse<NullFile>())
+                    .get("/", Http::MethodResponse(NullFile()))
                     .is_success());
 
 #if 0 && INET_API_IS_MBEDTLS
@@ -327,7 +327,7 @@ public:
       HttpClient http_client;
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
       {
-        auto response = Http::MethodResponse<DataFile>();
+        auto response = Http::MethodResponse(DataFile());
         TEST_ASSERT(
           http_client.set_follow_redirects(false)
             .get("/redirect-to?url=httpbin.org&status_code=200", response)
@@ -351,7 +351,7 @@ public:
       TEST_ASSERT(http_client.connect("httpbin.org").is_success());
 
       {
-        auto response = Http::MethodResponse<DataFile>();
+        auto response = Http::MethodResponse(DataFile());
         TEST_ASSERT(http_client.get("/get", response).is_success());
         if (response.file.size()) {
           printer().key("response", response.file.data().add_null_terminator());
@@ -368,7 +368,7 @@ public:
       TEST_ASSERT(http_client.connect("github.com").is_success());
 
       {
-        auto response = Http::MethodResponse<DataFile>();
+        auto response = Http::MethodResponse(DataFile());
         TEST_ASSERT(
           http_client
             .get(

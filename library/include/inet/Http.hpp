@@ -111,8 +111,9 @@ public:
   template <typename FileObjectType> struct MethodResponse {
     FileObjectType file;
     explicit MethodResponse(
+      FileObjectType response_value,
       const api::ProgressCallback *progress_callback = nullptr)
-      : m_execute_method{
+      : file{std::move(response_value)}, m_execute_method{
         .progress_callback = progress_callback,
         .request = nullptr,
         .response = &file} {}
