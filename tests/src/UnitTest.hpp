@@ -8,16 +8,42 @@
 #include "printer.hpp"
 #include "sys.hpp"
 #include "test/Test.hpp"
-#include "thread.hpp"
+#include "thread/Mutex.hpp"
+#include "thread/Thread.hpp"
 #include "var.hpp"
+
+using namespace thread;
 
 using S = Socket;
 
 class UnitTest : public test::Test {
-public:
-  UnitTest(var::StringView name) : test::Test(name) {}
 
-  bool execute_class_api_case() {
+  Socket::Family m_family;
+  u16 m_server_port;
+  Mutex m_listening_mutex;
+  Cond m_listening = Cond(m_listening_mutex);
+
+  void randomize_server_port() {
+    m_server_port = ClockTime::get_system_time().nanoseconds() / 1000;
+    m_server_port = (m_server_port % (65535 - 49152)) + 49152;
+  }
+
+  auto start_server(Thread::Function &&server_function) {
+    m_listening.set_asserted(false);
+    auto server_thread
+      = Thread(std::forward<Thread::Function>(server_function));
+
+    PRINTER_TRACE(printer(), "wait listening");
+    while (!m_listening && server_thread.is_running()) {
+      wait(25_milliseconds);
+    }
+    return server_thread;
+  }
+
+public:
+  explicit UnitTest(var::StringView name) : test::Test(name) {}
+
+  bool execute_class_api_case() override {
 
 #if !defined __win32
     TEST_ASSERT_RESULT(socket_case());
@@ -28,15 +54,15 @@ public:
     return true;
   }
 
-  static bool http_server(UnitTest *self) {
+  auto http_server() {
 
     AddressInfo address_info(AddressInfo::Construct()
                                .set_family(S::Family::inet)
-                               .set_service(NumberString(self->m_server_port))
+                               .set_service(NumberString(m_server_port))
                                .set_type(Socket::Type::stream)
                                .set_flags(AddressInfo::Flags::passive));
 
-    TEST_SELF_ASSERT(address_info.list().count() > 0);
+    TEST_ASSERT(address_info.list().count() > 0);
 
     const SocketAddress &server_listen_address = address_info.list().at(0);
     Socket server_listen_socket = Socket(server_listen_address)
@@ -48,18 +74,13 @@ public:
 
     SocketAddress accept_address;
 
-    self->printer().object("listening", server_listen_address);
-    self->m_is_listening = true;
+    printer().object("listening", server_listen_address);
+    m_listening.set_asserted();
 
     HttpServer(server_listen_socket.accept(accept_address))
       .run(
-        self,
-        [](HttpServer *server, void *context, const Http::Request &request)
-          -> Http::IsStop {
-          // handle the request
-          UnitTest *self = reinterpret_cast<UnitTest *>(context);
-
-          self->printer().key(
+        [&](HttpServer *server, const Http::Request &request) -> Http::IsStop {
+          printer().key(
             "requestMethod",
             Http::to_string(request.method()).string_view());
 
@@ -73,9 +94,7 @@ public:
 
           auto show_incoming = [&]() {
             auto incoming_copy = incoming.data();
-            self->printer().key(
-              "incoming",
-              incoming_copy.add_null_terminator());
+            printer().key("incoming", incoming_copy.add_null_terminator());
           };
 
           switch (request.method()) {
@@ -98,13 +117,6 @@ public:
             break;
 
           case Http::Method::post:
-            server->receive(incoming)
-              .add_header_field("content-length", NumberString(incoming.size()))
-              .send(Http::Response(server->http_version(), Http::Status::ok))
-              .send(incoming.seek(0));
-            show_incoming();
-            break;
-
           case Http::Method::put:
             server->receive(incoming)
               .add_header_field("content-length", NumberString(incoming.size()))
@@ -121,20 +133,17 @@ public:
             break;
 
           case Http::Method::delete_:
-            break;
           case Http::Method::head:
-            break;
           case Http::Method::options:
-            break;
           case Http::Method::trace:
             break;
           }
 
-          self->printer().key_bool("close", is_connection_close);
+          printer().key_bool("close", is_connection_close);
           return is_connection_close ? Http::IsStop::yes : Http::IsStop::no;
         });
 
-    self->printer().key("connection", StringView("--close--"));
+    printer().key("connection", StringView("--close--"));
     return true;
   }
 
@@ -142,9 +151,12 @@ public:
     randomize_server_port();
 
     {
-      m_is_listening = false;
+      m_listening.set_asserted(false);
       Printer::Object po(printer(), "httpClient/Server");
-      auto server_thread = start_server(http_server);
+      auto server_thread = start_server([&]() -> void * {
+        http_server();
+        return nullptr;
+      });
       TEST_ASSERT(is_success());
 
       PRINTER_TRACE(printer(), "httpGet");
@@ -289,8 +301,7 @@ public:
         printer().key("response", request.file.data().add_null_terminator());
       }
     }
-
-    if (1) {
+    {
       Printer::Object po(printer(), "ip.jsontest.com");
       TEST_ASSERT(HttpClient()
                     .connect("ip.jsontest.com")
@@ -474,19 +485,19 @@ public:
     return true;
   }
 
-  static bool socket_tcp_server(UnitTest *self) {
+  bool socket_tcp_server() {
 
     AddressInfo address_info(AddressInfo::Construct()
-                               .set_family(self->m_family)
+                               .set_family(m_family)
                                .set_node("")
-                               .set_service(NumberString(self->m_server_port))
+                               .set_service(NumberString(m_server_port))
                                .set_type(Socket::Type::stream)
                                .set_protocol(Socket::Protocol::tcp)
                                .set_flags(AddressInfo::Flags::passive));
 
-    self->printer().object("tcpAddress", address_info);
+    printer().object("tcpAddress", address_info);
 
-    TEST_SELF_ASSERT(address_info.list().count() > 0);
+    TEST_ASSERT(address_info.list().count() > 0);
 
     const SocketAddress &server_address = address_info.list().at(0);
     Socket server
@@ -496,15 +507,15 @@ public:
                       S::NameFlags::socket_reuse_address,
                       true)));
     // api::ExecutionContext::reset_error();
-    TEST_SELF_ASSERT(is_success());
+    TEST_ASSERT(is_success());
 
-    self->printer().object("serverAddress", address_info.list().at(0));
-    TEST_SELF_ASSERT(server.bind_and_listen(server_address).is_success());
+    printer().object("serverAddress", address_info.list().at(0));
+    TEST_ASSERT(server.bind_and_listen(server_address).is_success());
     SocketAddress accept_address;
-    self->m_is_listening = true;
-    self->printer().key_bool("listening", self->m_is_listening);
+    m_listening.set_asserted();
+    printer().key_bool("listening", bool(m_listening));
     Socket incoming = server.accept(accept_address);
-    TEST_SELF_ASSERT(is_success());
+    TEST_ASSERT(is_success());
 
     // data for incoming header
     var::Data incoming_data(64);
@@ -522,7 +533,11 @@ public:
 
     m_family = family;
 
-    Thread server_thread = start_server(socket_tcp_server);
+    auto server_thread = start_server([&]() -> void * {
+      socket_tcp_server();
+      return nullptr;
+    });
+
     TEST_ASSERT(server_thread.is_running());
 
     PRINTER_TRACE(printer(), "get address info");
@@ -550,17 +565,17 @@ public:
     return true;
   }
 
-  static bool socket_udp_server(UnitTest *self) {
+  auto socket_udp_server() {
 
-    auto bind_socket = [self]() {
+    auto bind_socket = [&]() {
       AddressInfo address_info(AddressInfo::Construct()
-                                 .set_family(self->m_family)
+                                 .set_family(m_family)
                                  .set_node("")
-                                 .set_service(NumberString(self->m_server_port))
+                                 .set_service(NumberString(m_server_port))
                                  .set_type(Socket::Type::datagram)
                                  .set_flags(AddressInfo::Flags::passive));
 
-      self->printer().object("udpAddressInfo", address_info);
+      printer().object("udpAddressInfo", address_info);
 
       for (const auto &a : address_info.list()) {
         Socket socket = std::move(Socket(a).bind(a));
@@ -571,35 +586,31 @@ public:
         API_RESET_ERROR();
       }
 
-      API_RETURN_VALUE_ASSIGN_ERROR(
-        std::move(Socket(self->m_family)),
-        "",
-        EINVAL);
+      API_RETURN_VALUE_ASSIGN_ERROR(std::move(Socket(m_family)), "", EINVAL);
     };
 
     Socket server_socket = bind_socket();
     SocketAddress server_address = server_socket.get_sock_name();
 
-    self->printer().object("udpServerAddress", server_address);
+    printer().object("udpServerAddress", server_address);
 
-    TEST_SELF_ASSERT(is_success());
+    TEST_ASSERT(is_success());
 
     // data for incoming header
     var::Data incoming_data(64);
 
-    PRINTER_TRACE(self->printer(), "udp server receive data");
-    self->m_is_listening = true;
+    PRINTER_TRACE(printer(), "udp server receive data");
+    m_listening.set_asserted();
     // echo incoming data
     SocketAddress client_address = server_socket.receive_from(incoming_data);
     if (is_success()) {
-      self->printer().object("clientAddress", client_address);
+      printer().object("clientAddress", client_address);
       server_socket.send_to(
         client_address,
         View(incoming_data).truncate(return_value()));
     }
 
-    PRINTER_TRACE(self->printer(), "data received");
-
+    PRINTER_TRACE(printer(), "data received");
     return true;
   }
 
@@ -607,9 +618,12 @@ public:
 
     randomize_server_port();
     m_family = family;
-    m_is_listening = false;
+    m_listening.set_asserted(false);
 
-    Thread server_thread = start_server(socket_udp_server);
+    auto server_thread = start_server([&]() -> void * {
+      socket_udp_server();
+      return nullptr;
+    });
     TEST_ASSERT(server_thread.is_running());
 
     PRINTER_TRACE(printer(), "get address info");
@@ -648,32 +662,4 @@ public:
     return true;
   }
 
-private:
-  Socket::Family m_family;
-  u16 m_server_port;
-  volatile bool m_is_listening;
-  bool (*m_server_function)(UnitTest *);
-
-  Thread start_server(bool (*server_function)(UnitTest *self)) {
-    m_server_function = server_function;
-    m_is_listening = false;
-    auto server_thread
-      = Thread(Thread::Construct().set_argument(this).set_function(
-        [](void *args) -> void * {
-          UnitTest *self = reinterpret_cast<UnitTest *>(args);
-          self->m_server_function(self);
-          return nullptr;
-        }));
-
-    PRINTER_TRACE(printer(), "wait listening");
-    while (!m_is_listening && server_thread.is_running()) {
-      wait(25_milliseconds);
-    }
-    return server_thread;
-  }
-
-  void randomize_server_port() {
-    m_server_port = ClockTime::get_system_time().nanoseconds() / 1000;
-    m_server_port = (m_server_port % (65535 - 49152)) + 49152;
-  }
 };

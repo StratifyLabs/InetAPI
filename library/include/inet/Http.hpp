@@ -464,8 +464,8 @@ public:
 
   [[deprecated(
     "Use post(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]]
-  HttpSecureClient &post(var::StringView path, const Post &options) {
+    "&)")]] HttpSecureClient &
+  post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
   template <typename FileObjectType>
@@ -481,8 +481,8 @@ public:
 
   [[deprecated(
     "Use put(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]]
-  HttpSecureClient &put(var::StringView path, const Put &options) {
+    "&)")]] HttpSecureClient &
+  put(var::StringView path, const Put &options) {
     return execute_method(Method::put, path, options);
   }
 
@@ -594,7 +594,7 @@ public:
 
   using Respond = api::Function<IsStop(HttpServer *, const Http::Request &)>;
 
-  HttpServer &run(
+  [[deprecated("Use run(const Respond &)")]] HttpServer &run(
     void *context,
     IsStop (*respond)(
       HttpServer *server_self,
