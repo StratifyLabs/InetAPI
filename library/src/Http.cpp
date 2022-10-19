@@ -27,7 +27,7 @@ Printer &operator<<(Printer &printer, const inet::Http::Response &value) {
 using namespace inet;
 using namespace var;
 
-#define API_HANDLE_STATUS_CASE(c)                                              \
+#define HANDLE_STATUS_CASE(c)                                              \
   case Status::c:                                                              \
     result = KeyString().format("%d %s", Status::c, MCU_STRINGIFY(c));         \
     break
@@ -35,73 +35,72 @@ using namespace var;
 KeyString Http::to_string(Status status) {
   KeyString result;
   switch (status) {
-    API_HANDLE_STATUS_CASE(null);
-    API_HANDLE_STATUS_CASE(continue_);
-    API_HANDLE_STATUS_CASE(switching_protocols);
-    API_HANDLE_STATUS_CASE(processing);
-    API_HANDLE_STATUS_CASE(early_hints);
-    API_HANDLE_STATUS_CASE(ok);
-    API_HANDLE_STATUS_CASE(created);
-    API_HANDLE_STATUS_CASE(accepted);
-    API_HANDLE_STATUS_CASE(non_authoritative_information);
-    API_HANDLE_STATUS_CASE(no_content);
-    API_HANDLE_STATUS_CASE(reset_content);
-    API_HANDLE_STATUS_CASE(partial_content);
-    API_HANDLE_STATUS_CASE(multi_status);
-    API_HANDLE_STATUS_CASE(already_reported);
-    API_HANDLE_STATUS_CASE(im_used);
-    API_HANDLE_STATUS_CASE(multiple_choices);
-    API_HANDLE_STATUS_CASE(moved_permanently);
-    API_HANDLE_STATUS_CASE(found);
-    API_HANDLE_STATUS_CASE(see_other);
-    API_HANDLE_STATUS_CASE(not_modified);
-    API_HANDLE_STATUS_CASE(use_proxy);
-    API_HANDLE_STATUS_CASE(switch_proxy);
-    API_HANDLE_STATUS_CASE(temporary_redirect);
-    API_HANDLE_STATUS_CASE(permanent_redirect);
-    API_HANDLE_STATUS_CASE(bad_request);
-    API_HANDLE_STATUS_CASE(unauthorized);
-    API_HANDLE_STATUS_CASE(payment_required);
-    API_HANDLE_STATUS_CASE(forbidden);
-    API_HANDLE_STATUS_CASE(not_found);
-    API_HANDLE_STATUS_CASE(method_not_allowed);
-    API_HANDLE_STATUS_CASE(not_acceptable);
-    API_HANDLE_STATUS_CASE(proxy_authentication_required);
-    API_HANDLE_STATUS_CASE(request_timeout);
-    API_HANDLE_STATUS_CASE(conflict);
-    API_HANDLE_STATUS_CASE(gone);
-    API_HANDLE_STATUS_CASE(length_required);
-    API_HANDLE_STATUS_CASE(precondition_failed);
-    API_HANDLE_STATUS_CASE(payload_too_large);
-    API_HANDLE_STATUS_CASE(uri_too_long);
-    API_HANDLE_STATUS_CASE(unsupported_media_type);
-    API_HANDLE_STATUS_CASE(range_not_satisfiable);
-    API_HANDLE_STATUS_CASE(expectation_failed);
-    API_HANDLE_STATUS_CASE(misdirected_request);
-    API_HANDLE_STATUS_CASE(unprocessable_entity);
-    API_HANDLE_STATUS_CASE(locked);
-    API_HANDLE_STATUS_CASE(failed_dependency);
-    API_HANDLE_STATUS_CASE(too_early);
-    API_HANDLE_STATUS_CASE(upgrade_required);
-    API_HANDLE_STATUS_CASE(precondition_required);
-    API_HANDLE_STATUS_CASE(too_many_requests);
-    API_HANDLE_STATUS_CASE(request_header_fields_too_large);
-    API_HANDLE_STATUS_CASE(unavailable_for_legal_reasons);
-    API_HANDLE_STATUS_CASE(internal_server_error);
-    API_HANDLE_STATUS_CASE(not_implemented);
-    API_HANDLE_STATUS_CASE(bad_gateway);
-    API_HANDLE_STATUS_CASE(service_unavailable);
-    API_HANDLE_STATUS_CASE(gateway_timeout);
-    API_HANDLE_STATUS_CASE(http_version_not_supported);
-    API_HANDLE_STATUS_CASE(variant_also_negotiates);
-    API_HANDLE_STATUS_CASE(insufficient_storage);
-    API_HANDLE_STATUS_CASE(loop_detected);
-    API_HANDLE_STATUS_CASE(not_extended);
-    API_HANDLE_STATUS_CASE(network_authentication_required);
+    HANDLE_STATUS_CASE(null);
+    HANDLE_STATUS_CASE(continue_);
+    HANDLE_STATUS_CASE(switching_protocols);
+    HANDLE_STATUS_CASE(processing);
+    HANDLE_STATUS_CASE(early_hints);
+    HANDLE_STATUS_CASE(ok);
+    HANDLE_STATUS_CASE(created);
+    HANDLE_STATUS_CASE(accepted);
+    HANDLE_STATUS_CASE(non_authoritative_information);
+    HANDLE_STATUS_CASE(no_content);
+    HANDLE_STATUS_CASE(reset_content);
+    HANDLE_STATUS_CASE(partial_content);
+    HANDLE_STATUS_CASE(multi_status);
+    HANDLE_STATUS_CASE(already_reported);
+    HANDLE_STATUS_CASE(im_used);
+    HANDLE_STATUS_CASE(multiple_choices);
+    HANDLE_STATUS_CASE(moved_permanently);
+    HANDLE_STATUS_CASE(found);
+    HANDLE_STATUS_CASE(see_other);
+    HANDLE_STATUS_CASE(not_modified);
+    HANDLE_STATUS_CASE(use_proxy);
+    HANDLE_STATUS_CASE(switch_proxy);
+    HANDLE_STATUS_CASE(temporary_redirect);
+    HANDLE_STATUS_CASE(permanent_redirect);
+    HANDLE_STATUS_CASE(bad_request);
+    HANDLE_STATUS_CASE(unauthorized);
+    HANDLE_STATUS_CASE(payment_required);
+    HANDLE_STATUS_CASE(forbidden);
+    HANDLE_STATUS_CASE(not_found);
+    HANDLE_STATUS_CASE(method_not_allowed);
+    HANDLE_STATUS_CASE(not_acceptable);
+    HANDLE_STATUS_CASE(proxy_authentication_required);
+    HANDLE_STATUS_CASE(request_timeout);
+    HANDLE_STATUS_CASE(conflict);
+    HANDLE_STATUS_CASE(gone);
+    HANDLE_STATUS_CASE(length_required);
+    HANDLE_STATUS_CASE(precondition_failed);
+    HANDLE_STATUS_CASE(payload_too_large);
+    HANDLE_STATUS_CASE(uri_too_long);
+    HANDLE_STATUS_CASE(unsupported_media_type);
+    HANDLE_STATUS_CASE(range_not_satisfiable);
+    HANDLE_STATUS_CASE(expectation_failed);
+    HANDLE_STATUS_CASE(misdirected_request);
+    HANDLE_STATUS_CASE(unprocessable_entity);
+    HANDLE_STATUS_CASE(locked);
+    HANDLE_STATUS_CASE(failed_dependency);
+    HANDLE_STATUS_CASE(too_early);
+    HANDLE_STATUS_CASE(upgrade_required);
+    HANDLE_STATUS_CASE(precondition_required);
+    HANDLE_STATUS_CASE(too_many_requests);
+    HANDLE_STATUS_CASE(request_header_fields_too_large);
+    HANDLE_STATUS_CASE(unavailable_for_legal_reasons);
+    HANDLE_STATUS_CASE(internal_server_error);
+    HANDLE_STATUS_CASE(not_implemented);
+    HANDLE_STATUS_CASE(bad_gateway);
+    HANDLE_STATUS_CASE(service_unavailable);
+    HANDLE_STATUS_CASE(gateway_timeout);
+    HANDLE_STATUS_CASE(http_version_not_supported);
+    HANDLE_STATUS_CASE(variant_also_negotiates);
+    HANDLE_STATUS_CASE(insufficient_storage);
+    HANDLE_STATUS_CASE(loop_detected);
+    HANDLE_STATUS_CASE(not_extended);
+    HANDLE_STATUS_CASE(network_authentication_required);
   }
 
-  result(KeyString::Replace().set_old_character('_').set_new_character(' '));
-
+  result(ReplaceCharacter{.new_character = ' ', .old_character = '_'});
   return result;
 }
 
