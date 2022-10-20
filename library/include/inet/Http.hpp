@@ -114,9 +114,10 @@ public:
       FileObjectType response_value,
       const api::ProgressCallback *progress_callback = nullptr)
       : file{std::move(response_value)}, m_execute_method{
-        .progress_callback = progress_callback,
-        .request = nullptr,
-        .response = &file} {}
+                                           .progress_callback
+                                           = progress_callback,
+                                           .request = nullptr,
+                                           .response = &file} {}
     const ExecuteMethod &get_execute_method() const { return m_execute_method; }
 
   private:
@@ -285,10 +286,7 @@ class HttpClient : public Http {
 public:
   HttpClient(var::StringView http_version = "HTTP/1.1");
 
-  [[deprecated(
-    "Use get(var::StringView, const MethodResponse<FileObjectType> "
-    "&)")]] HttpClient &
-  get(var::StringView path, const Get &options) {
+  HttpClient &get(var::StringView path, const Get &options) {
     return execute_method(Method::get, path, options);
   }
 
@@ -302,11 +300,7 @@ public:
   get(var::StringView path, const MethodResponse<FileObjectType> &response) && {
     return std::move(get(path, response));
   }
-
-  [[deprecated(
-    "Use post(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]] HttpClient &
-  post(var::StringView path, const Post &options) {
+  HttpClient &post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
 
@@ -321,11 +315,7 @@ public:
     return std::move(post(path, request));
   }
 
-  [[deprecated(
-    "Use put(var::StringView, const MethodRequest<FileObjectType> "
-    "&) or put(var::StringView path, const "
-    "MethodExchange<FileObjectType> &exchange)")]] HttpClient &
-  put(var::StringView path, const Put &options) & {
+  HttpClient &put(var::StringView path, const Put &options) & {
     return execute_method(Method::put, path, options);
   }
 
@@ -351,10 +341,7 @@ public:
     return std::move(put(path, exchange));
   }
 
-  [[deprecated(
-    "Use patch(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]] HttpClient &
-  patch(var::StringView path, const Patch &options) {
+  HttpClient &patch(var::StringView path, const Patch &options) {
     return execute_method(Method::patch, path, options);
   }
 
@@ -445,10 +432,7 @@ public:
   explicit HttpSecureClient(var::StringView http_version = "HTTP/1.1")
     : HttpClient(http_version) {}
 
-  [[deprecated(
-    "Use get(var::StringView, const MethodResponse<FileObjectType> "
-    "&)")]] HttpSecureClient &
-  get(var::StringView path, const Get &options) {
+  HttpSecureClient &get(var::StringView path, const Get &options) {
     return execute_method(Method::get, path, options);
   }
 
@@ -463,10 +447,7 @@ public:
     return std::move(get(path, response));
   }
 
-  [[deprecated(
-    "Use post(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]] HttpSecureClient &
-  post(var::StringView path, const Post &options) {
+  HttpSecureClient &post(var::StringView path, const Post &options) {
     return execute_method(Method::post, path, options);
   }
   template <typename FileObjectType>
@@ -480,10 +461,7 @@ public:
     return std::move(post(path, request));
   }
 
-  [[deprecated(
-    "Use put(var::StringView, const MethodExchange<FileObjectType> "
-    "&)")]] HttpSecureClient &
-  put(var::StringView path, const Put &options) {
+  HttpSecureClient &put(var::StringView path, const Put &options) {
     return execute_method(Method::put, path, options);
   }
 

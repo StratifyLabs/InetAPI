@@ -92,10 +92,10 @@ if(${CMSDK_IS_ARM})
 	message("Linking to StratifyOS MCU for header inclusion")
 	cmsdk2_library_add_dependencies(
 		TARGET ${DEBUG_TARGET}
-		DEPENDENCIES StratifyOS_mcu)
+		DEPENDENCIES StratifyOS_interface)
 	cmsdk2_library_add_dependencies(
 		TARGET ${RELEASE_TARGET}
-		DEPENDENCIES StratifyOS_mcu)
+		DEPENDENCIES StratifyOS_interface)
 endif()
 target_compile_options(${DEBUG_TARGET} PUBLIC -g)
 install(FILES ${PROJECT_NAME}.cmake
