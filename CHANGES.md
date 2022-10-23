@@ -1,3 +1,13 @@
+# Version 1.6.0 (unreleased)
+
+## New Features
+
+- None yet
+
+## Bug Fixes
+
+- None yet
+
 # Version 1.5.0
 
 ## New Features
