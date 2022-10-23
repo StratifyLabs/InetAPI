@@ -375,6 +375,16 @@ public:
   HttpClient &remove(var::StringView path, const Remove &options) {
     return execute_method(Method::delete_, path, options);
   }
+  template <typename FileObjectType>
+  HttpClient &
+  remove(var::StringView path, const MethodResponse<FileObjectType> &response) & {
+    return execute_method(Method::delete_, path, response.get_execute_method());
+  }
+  template <typename FileObjectType>
+  HttpClient &&
+  remove(var::StringView path, const MethodResponse<FileObjectType> &response) && {
+    return std::move(remove(path, response));
+  }
 
   /*! \cond */
   HttpClient &options(var::StringView path) {
@@ -509,6 +519,16 @@ public:
   // http delete
   HttpSecureClient &remove(var::StringView path, const Remove &options) {
     return execute_method(Method::delete_, path, options);
+  }
+  template <typename FileObjectType>
+  HttpSecureClient &
+  remove(var::StringView path, const MethodResponse<FileObjectType> &response) & {
+    return execute_method(Method::delete_, path, response.get_execute_method());
+  }
+  template <typename FileObjectType>
+  HttpSecureClient &&
+  remove(var::StringView path, const MethodResponse<FileObjectType> &response) && {
+    return std::move(remove(path, response));
   }
 
   HttpSecureClient &options(var::StringView path) {
