@@ -3,8 +3,12 @@
 #ifndef INET_API_INET_WIFI_HPP
 #define INET_API_INET_WIFI_HPP
 
+#include <sdk/api.h>
+
 #if defined __StratifyOS__ || INET_API_HAS_STRATIFY_OS
-#include <sos/api/wifi_api.h>
+#include <sos/api/wifi.h>
+#endif
+#if defined SDK_API_WIFI_API_T || defined SOS_API_WIFI_API_H
 
 #include <chrono/ClockTimer.hpp>
 #include <chrono/DateTime.hpp>
