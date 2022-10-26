@@ -1,3 +1,9 @@
+# Version 1.5.1
+
+## Bug Fixes
+
+- Fixed bug when including `Wifi.hpp` to include appropriate types
+
 # Version 1.5.0
 
 ## New Features
