@@ -1,3 +1,10 @@
+# Version 1.5.2 (unreleased)
+
+## Bug Fixes
+
+- Removed including `sos/api/wifi.h` and uses `sdk/api.h` instead
+  - This changes requires using CMakeSDK v2.1.0 or greater
+
 # Version 1.5.1
 
 ## Bug Fixes
