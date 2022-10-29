@@ -1,6 +1,8 @@
 cmake_minimum_required (VERSION 3.12)
 
-project(InetAPI CXX)
+project(InetAPI
+	LANGUAGES CXX
+	VERSION 1.5.2)
 
 set(LWIP_VERSION "2.1.2" CACHE INTERNAL "Effective LWIP version")
 
