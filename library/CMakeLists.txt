@@ -13,7 +13,6 @@ cmsdk2_check_version(
 
 api2_add_library(
   NAME ${PROJECT_NAME}
-  VERSION ${PROJECT_VERSION}
   DEPENDENCIES ${LIBRARIES}
   TARGETS TARGET_LIST)
 
