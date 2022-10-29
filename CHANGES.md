@@ -4,6 +4,7 @@
 
 - Removed including `sos/api/wifi.h` and uses `sdk/api.h` instead
   - This changes requires using CMakeSDK v2.1.0 or greater
+- Add version requirements
 
 # Version 1.5.1
 
