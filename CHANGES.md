@@ -1,4 +1,4 @@
-# Version 1.5.2 (unreleased)
+# Version 1.5.2
 
 ## Bug Fixes
 
