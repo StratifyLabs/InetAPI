@@ -1,18 +1,25 @@
 
 #include <cstdio>
 
-#include "api/api.hpp"
-#include "chrono.hpp"
-#include "fs.hpp"
-#include "inet.hpp"
-#include "printer.hpp"
-#include "sys.hpp"
-#include "test/Test.hpp"
-#include "thread/Mutex.hpp"
-#include "thread/Thread.hpp"
-#include "var.hpp"
+#include <api/api.hpp>
+#include <test/Test.hpp>
+#include <thread/Mutex.hpp>
+#include <thread/Thread.hpp>
+#include <thread/Cond.hpp>
+#include <fs/DataFile.hpp>
+#include <fs/ViewFile.hpp>
 
+#include "inet/Socket.hpp"
+#include "inet/Http.hpp"
+
+using namespace chrono;
+using namespace test;
 using namespace thread;
+using namespace inet;
+using namespace fs;
+using namespace var;
+using namespace printer;
+
 
 using S = Socket;
 
