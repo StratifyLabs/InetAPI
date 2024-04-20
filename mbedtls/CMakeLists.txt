@@ -104,12 +104,12 @@ cmsdk2_library_add_dependencies(
 
 foreach(TARGET ${DEBUG_TARGET_LIST})
   get_target_property(ARCH ${TARGET} CMSDK_PROPERTY_ARCH)
-  target_compile_definitions(${TARGET} PUBLIC __${ARCH})
+  target_compile_definitions(${TARGET} PUBLIC __${ARCH}=__${ARCH})
 endforeach()
 
 foreach(TARGET ${RELEASE_TARGET_LIST})
   get_target_property(ARCH ${TARGET} CMSDK_PROPERTY_ARCH)
-  target_compile_definitions(${TARGET} PUBLIC __${ARCH})
+  target_compile_definitions(${TARGET} PUBLIC __${ARCH}=__${ARCH})
 endforeach()
 
 target_compile_options(${DEBUG_TARGET} PUBLIC -g)
