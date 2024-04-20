@@ -1,8 +1,13 @@
-# Version 1.5.3 (unreleased)
+# Version 1.5.4 (unreleased)
+## Bug Fixes
 
+- None
+
+# Version 1.5.3
 ## Bug Fixes
 
 - Removed extra includes from test
+- Fix __link build error on macOs
 
 # Version 1.5.2
 
